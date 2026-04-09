@@ -97,25 +97,52 @@ public class PlayerJump : MonoBehaviour
         velocityY = 0;
     }
 
-    // 🔥 IMPORTANTE (isso resolve seu erro)
     public bool IsGrounded()
     {
         return isGrounded;
     }
 
+    // ✅ CORREÇÃO PRINCIPAL AQUI
     void OnCollisionEnter2D(Collision2D col)
     {
         if (col.gameObject.CompareTag("Ground"))
         {
-            isGrounded = true;
-            velocityY = 0;
-            jumpCount = 0;
+            foreach (ContactPoint2D contact in col.contacts)
+            {
+                // só considera chão se for contato vindo de baixo
+                if (contact.normal.y > 0.5f)
+                {
+                    isGrounded = true;
+                    velocityY = 0;
+                    jumpCount = 0;
+                    break;
+                }
+            }
         }
+    }
+
+    void OnCollisionStay2D(Collision2D col)
+    {
+        if (col.gameObject.CompareTag("Ground"))
+        {
+            foreach (ContactPoint2D contact in col.contacts)
+            {
+                if (contact.normal.y > 0.5f)
+                {
+                    isGrounded = true;
+                    return;
+                }
+            }
+        }
+
+        isGrounded = false;
     }
 
     void OnCollisionExit2D(Collision2D col)
     {
         if (col.gameObject.CompareTag("Ground"))
+        {
             isGrounded = false;
+        }
     }
 }

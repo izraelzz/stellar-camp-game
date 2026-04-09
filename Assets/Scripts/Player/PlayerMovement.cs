@@ -13,7 +13,7 @@ public class PlayerMovement : MonoBehaviour
     public float dashCooldown = 0.4f;
 
     [Header("Ataque")]
-    public Transform attackPoint; // attackPoint vinculado aqui para ajustar posição automaticamente
+    public Transform attackPoint;
 
     private Rigidbody2D rb;
     private float velocityX;
@@ -55,7 +55,6 @@ public class PlayerMovement : MonoBehaviour
     {
         float input = Input.GetAxisRaw("Horizontal");
 
-        // virar personagem
         if (input > 0)
         {
             transform.localScale = Vector3.one;
@@ -68,6 +67,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         float targetSpeed = input * moveSpeed;
+
         velocityX = Mathf.MoveTowards(
             velocityX,
             targetSpeed,
@@ -84,7 +84,8 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isDashing)
         {
-            rb.linearVelocity = new Vector2(dashDirection * dashSpeed, 0);
+            // 🔥 mantém o Y → câmera fica suave
+            rb.linearVelocity = new Vector2(dashDirection * dashSpeed, rb.linearVelocity.y);
             return;
         }
 
@@ -97,11 +98,14 @@ public class PlayerMovement : MonoBehaviour
         dashTimer = dashDuration;
         dashCooldownTimer = dashCooldown;
 
-        dashDirection = input != 0 ? (int)input : (transform.localScale.x > 0 ? 1 : -1);
+        dashDirection = input != 0
+            ? (int)Mathf.Sign(input)
+            : (transform.localScale.x > 0 ? 1 : -1);
+
         jump.ResetVerticalVelocity();
     }
 
-    private void FlipAttackPoint(bool facingRight)
+    void FlipAttackPoint(bool facingRight)
     {
         if (attackPoint == null) return;
 
@@ -110,8 +114,15 @@ public class PlayerMovement : MonoBehaviour
         attackPoint.localPosition = pos;
     }
 
-    public bool IsDashing()
-    {
-        return isDashing;
-    }
+    // =========================
+    // 🔥 ESSENCIAL PARA CAMERA
+    // =========================
+
+    public bool IsDashing() => isDashing;
+
+    public float VelocityX => rb.linearVelocity.x;
+
+    public float VelocityY => rb.linearVelocity.y;
+
+    public bool IsGrounded => jump.IsGrounded();
 }
