@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerCombat : MonoBehaviour
 {
@@ -8,19 +9,28 @@ public class PlayerCombat : MonoBehaviour
     public LayerMask enemyLayer;
 
     [Header("Combo")]
-   [SerializeField] public float comboResetTime = 0.3f;
+    public float comboResetTime = 0.4f;
 
     private int comboStep = 0;
-    [SerializeField] private float comboTimer;
+    private float comboTimer;
 
     private bool isAttacking = false;
     private bool queuedNext = false;
 
+    [Header("Impacto")]
+    public float hitStopTime = 0.08f;
+    public float knockbackForce = 6f;
+
+    [Header("Controle durante ataque")]
+    public float attackMoveLock = 0.3f;
+
     private PlayerAnimation anim;
+    private PlayerMovement movement;
 
     void Awake()
     {
         anim = GetComponentInChildren<PlayerAnimation>();
+        movement = GetComponent<PlayerMovement>();
     }
 
     void Update()
@@ -54,10 +64,23 @@ public class PlayerCombat : MonoBehaviour
 
         comboTimer = comboResetTime;
 
+        // 🔥 trava levemente o movimento
+        StartCoroutine(AttackMovementLock());
+
         anim.PlayAttack(comboStep);
     }
 
-    // 🔥 chamado via Animation Event
+    IEnumerator AttackMovementLock()
+    {
+        float originalSpeed = movement.moveSpeed;
+        movement.moveSpeed *= attackMoveLock;
+
+        yield return new WaitForSeconds(0.1f);
+
+        movement.moveSpeed = originalSpeed;
+    }
+
+    // 🔥 CHAMADO NA ANIMAÇÃO
     public void PerformAttack()
     {
         Vector2 dir = Vector2.right * Mathf.Sign(transform.localScale.x);
@@ -70,15 +93,27 @@ public class PlayerCombat : MonoBehaviour
 
         foreach (var hit in hits)
         {
-            Debug.Log("HIT combo " + comboStep);
-
             Rigidbody2D rb = hit.GetComponent<Rigidbody2D>();
+
             if (rb != null)
-                rb.AddForce(dir * (comboStep * 2f), ForceMode2D.Impulse);
+            {
+                rb.linearVelocity = Vector2.zero;
+                rb.AddForce(dir * (knockbackForce + comboStep * 2f), ForceMode2D.Impulse);
+            }
+
+            // 🔥 HITSTOP (impacto real)
+            StartCoroutine(HitStop());
         }
     }
 
-    // 🔥 chamado no FINAL da animação
+    IEnumerator HitStop()
+    {
+        Time.timeScale = 0f;
+        yield return new WaitForSecondsRealtime(hitStopTime);
+        Time.timeScale = 1f;
+    }
+
+    // 🔥 FINAL DA ANIMAÇÃO
     public void EndAttack()
     {
         isAttacking = false;

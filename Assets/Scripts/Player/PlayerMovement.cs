@@ -7,10 +7,19 @@ public class PlayerMovement : MonoBehaviour
     public float acceleration = 60f;
     public float deceleration = 80f;
 
+    [Header("Air Control")]
+    public float airControlMultiplier = 0.5f;
+
+    [Header("Turn")]
+    public float turnSlowMultiplier = 0.6f;
+
     [Header("Dash")]
     public float dashSpeed = 20f;
     public float dashDuration = 0.18f;
     public float dashCooldown = 0.4f;
+
+    [Header("Dash Feel")]
+    public float dashEndSlow = 0.5f;
 
     [Header("Ataque")]
     public Transform attackPoint;
@@ -48,13 +57,17 @@ public class PlayerMovement : MonoBehaviour
         dashCooldownTimer -= Time.deltaTime;
 
         if (isDashing && dashTimer <= 0)
+        {
             isDashing = false;
+            velocityX *= dashEndSlow;
+        }
     }
 
     void HandleInput()
     {
         float input = Input.GetAxisRaw("Horizontal");
 
+        // virar personagem
         if (input > 0)
         {
             transform.localScale = Vector3.one;
@@ -68,10 +81,21 @@ public class PlayerMovement : MonoBehaviour
 
         float targetSpeed = input * moveSpeed;
 
+        bool grounded = jump.IsGrounded();
+        float control = grounded ? 1f : airControlMultiplier;
+
+        float accel = (Mathf.Abs(targetSpeed) > 0.01f ? acceleration : deceleration) * control;
+
+        // 🔥 suaviza troca de direção
+        if (Mathf.Sign(velocityX) != Mathf.Sign(targetSpeed) && Mathf.Abs(velocityX) > 0.1f)
+        {
+            velocityX *= turnSlowMultiplier;
+        }
+
         velocityX = Mathf.MoveTowards(
             velocityX,
             targetSpeed,
-            (Mathf.Abs(targetSpeed) > 0.01f ? acceleration : deceleration) * Time.deltaTime
+            accel * Time.deltaTime
         );
 
         if (Input.GetKeyDown(KeyCode.LeftShift) && dashCooldownTimer <= 0)
@@ -84,8 +108,10 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isDashing)
         {
-            // 🔥 mantém o Y → câmera fica suave
-            rb.linearVelocity = new Vector2(dashDirection * dashSpeed, rb.linearVelocity.y);
+            rb.linearVelocity = new Vector2(
+                dashDirection * dashSpeed,
+                rb.linearVelocity.y * 0.2f
+            );
             return;
         }
 
@@ -114,15 +140,9 @@ public class PlayerMovement : MonoBehaviour
         attackPoint.localPosition = pos;
     }
 
-    // =========================
-    // 🔥 ESSENCIAL PARA CAMERA
-    // =========================
-
+    // 🔥 usado pela câmera
     public bool IsDashing() => isDashing;
-
     public float VelocityX => rb.linearVelocity.x;
-
     public float VelocityY => rb.linearVelocity.y;
-
     public bool IsGrounded => jump.IsGrounded();
 }

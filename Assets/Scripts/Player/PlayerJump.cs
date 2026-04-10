@@ -16,6 +16,10 @@ public class PlayerJump : MonoBehaviour
     public int maxJumps = 2;
     public float secondJumpMultiplier = 0.7f;
 
+    [Header("Gravity Feel")]
+    public float fallMultiplier = 1.6f;
+    public float lowJumpMultiplier = 2.0f;
+
     private float velocityY;
 
     private float coyoteTimer;
@@ -70,7 +74,18 @@ public class PlayerJump : MonoBehaviour
     {
         if (movement.IsDashing()) return;
 
-        velocityY -= gravity * Time.fixedDeltaTime;
+        if (velocityY < 0)
+        {
+            velocityY -= gravity * fallMultiplier * Time.fixedDeltaTime;
+        }
+        else if (velocityY > 0 && !Input.GetButton("Jump"))
+        {
+            velocityY -= gravity * lowJumpMultiplier * Time.fixedDeltaTime;
+        }
+        else
+        {
+            velocityY -= gravity * Time.fixedDeltaTime;
+        }
 
         if (velocityY < maxFallSpeed)
             velocityY = maxFallSpeed;
@@ -102,14 +117,12 @@ public class PlayerJump : MonoBehaviour
         return isGrounded;
     }
 
-    // ✅ CORREÇÃO PRINCIPAL AQUI
     void OnCollisionEnter2D(Collision2D col)
     {
         if (col.gameObject.CompareTag("Ground"))
         {
             foreach (ContactPoint2D contact in col.contacts)
             {
-                // só considera chão se for contato vindo de baixo
                 if (contact.normal.y > 0.5f)
                 {
                     isGrounded = true;
