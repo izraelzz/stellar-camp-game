@@ -52,7 +52,7 @@ public class CameraSystem2D : MonoBehaviour
 
         currentX = Mathf.Lerp(currentX, target, Time.deltaTime * speed);
 
-        // limita pra não exagerar (ESSENCIAL pro feeling Silksong)
+        
         currentX = Mathf.Clamp(currentX, -maxLook, maxLook);
 
         Vector3 offset = composer.TargetOffset;
@@ -60,17 +60,28 @@ public class CameraSystem2D : MonoBehaviour
         composer.TargetOffset = offset;
     }
 
-    void VerticalResponse()
-    {
-        float vy = player.VelocityY;
+private float currentYDamping;
 
-        if (!player.IsGrounded)
-        {
-            composer.Damping.y = (vy > 0) ? upDamping : downDamping;
-        }
-        else
-        {
-            composer.Damping.y = groundedDamping;
-        }
+void VerticalResponse()
+{
+    float vy = player.VelocityY;
+
+    float targetDamping;
+
+    if (!player.IsGrounded)
+    {
+        targetDamping = (vy > 0) ? upDamping : downDamping;
     }
+    else
+    {
+        targetDamping = groundedDamping;
+    }
+
+    // suaviza a troca (ESSENCIAL)
+    currentYDamping = Mathf.Lerp(currentYDamping, targetDamping, Time.deltaTime * 5f);
+
+    Vector3 damping = composer.Damping;
+    damping.y = currentYDamping;
+    composer.Damping = damping;
+}
 }

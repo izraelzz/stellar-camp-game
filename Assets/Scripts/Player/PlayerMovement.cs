@@ -67,7 +67,6 @@ public class PlayerMovement : MonoBehaviour
     {
         float input = Input.GetAxisRaw("Horizontal");
 
-        // virar personagem
         if (input > 0)
         {
             transform.localScale = Vector3.one;
@@ -86,7 +85,6 @@ public class PlayerMovement : MonoBehaviour
 
         float accel = (Mathf.Abs(targetSpeed) > 0.01f ? acceleration : deceleration) * control;
 
-        // 🔥 suaviza troca de direção
         if (Mathf.Sign(velocityX) != Mathf.Sign(targetSpeed) && Mathf.Abs(velocityX) > 0.1f)
         {
             velocityX *= turnSlowMultiplier;
@@ -140,7 +138,6 @@ public class PlayerMovement : MonoBehaviour
         attackPoint.localPosition = pos;
     }
 
-    // 🔥 usado pela câmera
     public bool IsDashing() => isDashing;
     public float VelocityX => rb.linearVelocity.x;
     public float VelocityY => rb.linearVelocity.y;

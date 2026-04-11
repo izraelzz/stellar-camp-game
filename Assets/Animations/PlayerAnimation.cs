@@ -15,32 +15,53 @@ public class PlayerAnimation : MonoBehaviour
 
     void Update()
     {
+        float velocityY = rb.linearVelocity.y;
+
+        // parâmetros base
         anim.SetFloat("Speed", Mathf.Abs(rb.linearVelocity.x));
-        anim.SetFloat("VelocityY", rb.linearVelocity.y);
+        anim.SetFloat("VelocityY", velocityY);
         anim.SetBool("isGrounded", jump.IsGrounded());
+
+       
+        if (jump.JustLanded && jump.IsGrounded())
+        {
+            anim.ResetTrigger("Land"); // limpa possíveis restos
+            anim.SetTrigger("Land");
+        }
+
+        if (!jump.IsGrounded())
+        {
+            anim.ResetTrigger("Land");
+        }
+
+        
+        AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
+
+        if (state.IsName("playerLand") && !jump.IsGrounded())
+        {
+            anim.Play("Airborne"); // nome do seu blend tree de jump/fall
+        }
     }
 
-    // 🔥 inicia ataque
+    // ===== ATAQUE =====
+
     public void PlayAttack(int step)
     {
         anim.SetBool("isAttacking", true);
         anim.SetInteger("ComboStep", step);
     }
 
-    // 🔥 finaliza ataque
     public void ResetAttack()
     {
         anim.SetBool("isAttacking", false);
         anim.SetInteger("ComboStep", 0);
     }
 
-    // 🔥 evento no meio da animação
     public void PerformAttack()
     {
         GetComponentInParent<PlayerCombat>().PerformAttack();
     }
 
-    // 🔥 evento no final da animação
     public void EndAttack()
     {
         GetComponentInParent<PlayerCombat>().EndAttack();

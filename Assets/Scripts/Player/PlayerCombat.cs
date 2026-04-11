@@ -64,7 +64,6 @@ public class PlayerCombat : MonoBehaviour
 
         comboTimer = comboResetTime;
 
-        // 🔥 trava levemente o movimento
         StartCoroutine(AttackMovementLock());
 
         anim.PlayAttack(comboStep);
@@ -80,7 +79,7 @@ public class PlayerCombat : MonoBehaviour
         movement.moveSpeed = originalSpeed;
     }
 
-    // 🔥 CHAMADO NA ANIMAÇÃO
+    // CHAMADO NA ANIMAÇÃO
     public void PerformAttack()
     {
         Vector2 dir = Vector2.right * Mathf.Sign(transform.localScale.x);
@@ -101,7 +100,7 @@ public class PlayerCombat : MonoBehaviour
                 rb.AddForce(dir * (knockbackForce + comboStep * 2f), ForceMode2D.Impulse);
             }
 
-            // 🔥 HITSTOP (impacto real)
+            // HITSTOP
             StartCoroutine(HitStop());
         }
     }
@@ -113,7 +112,7 @@ public class PlayerCombat : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    // 🔥 FINAL DA ANIMAÇÃO
+    // FINAL DA ANIMAÇÃO
     public void EndAttack()
     {
         isAttacking = false;

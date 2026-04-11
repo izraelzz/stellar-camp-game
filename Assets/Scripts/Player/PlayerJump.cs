@@ -20,13 +20,25 @@ public class PlayerJump : MonoBehaviour
     public float fallMultiplier = 1.6f;
     public float lowJumpMultiplier = 2.0f;
 
+    [Header("Edge Fall Fix")]
+    public float edgeFallVelocity = -2f;
+
+    [Header("Landing Fix")]
+    public float groundedGraceTime = 0.05f;
+
     private float velocityY;
 
     private float coyoteTimer;
     private float jumpBufferTimer;
+    private float groundedTimer;
 
     private int jumpCount;
     private bool isGrounded;
+    private bool wasGrounded;
+
+    private bool jumpedThisFrame;
+
+    public bool JustLanded { get; private set; } // ⭐ IMPORTANTE
 
     private PlayerMovement movement;
 
@@ -39,6 +51,27 @@ public class PlayerJump : MonoBehaviour
     {
         HandleTimers();
         HandleInput();
+
+        groundedTimer -= Time.deltaTime;
+
+
+        JustLanded = false;
+        if (!wasGrounded && isGrounded)
+        {
+            JustLanded = true;
+        }
+
+        // EDGE FALL
+        if (wasGrounded && !isGrounded)
+        {
+            if (!jumpedThisFrame && velocityY <= 0)
+            {
+                velocityY = edgeFallVelocity;
+            }
+        }
+
+        wasGrounded = isGrounded;
+        jumpedThisFrame = false;
     }
 
     void FixedUpdate()
@@ -62,7 +95,7 @@ public class PlayerJump : MonoBehaviour
 
         if (jumpBufferTimer > 0)
         {
-            if (coyoteTimer > 0 || jumpCount < maxJumps)
+            if ((coyoteTimer > 0 || jumpCount < maxJumps) && groundedTimer <= 0)
                 Jump();
         }
 
@@ -74,18 +107,26 @@ public class PlayerJump : MonoBehaviour
     {
         if (movement.IsDashing()) return;
 
+        float gravityStep = gravity * Time.fixedDeltaTime;
+
+        if (velocityY < -0.1f && velocityY > -2f)
+            gravityStep *= 0.5f;
+
         if (velocityY < 0)
         {
-            velocityY -= gravity * fallMultiplier * Time.fixedDeltaTime;
+            velocityY -= gravityStep * fallMultiplier;
         }
         else if (velocityY > 0 && !Input.GetButton("Jump"))
         {
-            velocityY -= gravity * lowJumpMultiplier * Time.fixedDeltaTime;
+            velocityY -= gravityStep * lowJumpMultiplier;
         }
         else
         {
-            velocityY -= gravity * Time.fixedDeltaTime;
+            velocityY -= gravityStep;
         }
+
+        if (Mathf.Abs(velocityY) < 0.15f)
+            velocityY = 0;
 
         if (velocityY < maxFallSpeed)
             velocityY = maxFallSpeed;
@@ -100,22 +141,12 @@ public class PlayerJump : MonoBehaviour
             : jumpForce * secondJumpMultiplier;
 
         jumpBufferTimer = 0;
+        jumpedThisFrame = true;
     }
 
-    public float GetVelocityY()
-    {
-        return velocityY;
-    }
-
-    public void ResetVerticalVelocity()
-    {
-        velocityY = 0;
-    }
-
-    public bool IsGrounded()
-    {
-        return isGrounded;
-    }
+    public float GetVelocityY() => velocityY;
+    public void ResetVerticalVelocity() => velocityY = 0;
+    public bool IsGrounded() => isGrounded;
 
     void OnCollisionEnter2D(Collision2D col)
     {
@@ -126,6 +157,8 @@ public class PlayerJump : MonoBehaviour
                 if (contact.normal.y > 0.5f)
                 {
                     isGrounded = true;
+                    groundedTimer = groundedGraceTime;
+
                     velocityY = 0;
                     jumpCount = 0;
                     break;
