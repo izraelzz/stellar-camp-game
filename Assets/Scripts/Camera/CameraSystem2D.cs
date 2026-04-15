@@ -6,6 +6,7 @@ public class CameraSystem2D : MonoBehaviour
     public CinemachineCamera vcam;
     public PlayerMovement player;
 
+    private Rigidbody2D rb;
     private CinemachinePositionComposer composer;
 
     [Header("Look Ahead")]
@@ -30,6 +31,8 @@ public class CameraSystem2D : MonoBehaviour
 
         if (player == null)
             player = FindFirstObjectByType<PlayerMovement>();
+
+        rb = player.GetComponent<Rigidbody2D>();
     }
 
     void LateUpdate()
@@ -40,13 +43,14 @@ public class CameraSystem2D : MonoBehaviour
 
     void DirectionBias()
     {
-        float input = Mathf.Sign(player.VelocityX);
+        float vx = rb.linearVelocity.x;
+        float input = Mathf.Sign(vx);
 
-        if (Mathf.Abs(player.VelocityX) > 0.1f)
+        if (Mathf.Abs(vx) > 0.1f)
             lastDir = input;
 
         float target = lastDir * lookAhead;
-        float speed = (Mathf.Abs(player.VelocityX) > 0.1f) ? accel : decel;
+        float speed = (Mathf.Abs(vx) > 0.1f) ? accel : decel;
 
         currentX = Mathf.Lerp(currentX, target, Time.deltaTime * speed);
         currentX = Mathf.Clamp(currentX, -maxLook, maxLook);
@@ -58,9 +62,10 @@ public class CameraSystem2D : MonoBehaviour
 
     void VerticalResponse()
     {
-        float vy = player.VelocityY;
+        float vy = rb.linearVelocity.y;
+        bool grounded = player.LastOnGroundTime > 0;
 
-        float targetDamping = player.IsGrounded
+        float targetDamping = grounded
             ? groundedDamping
             : (vy > 0 ? upDamping : downDamping);
 

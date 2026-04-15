@@ -4,45 +4,50 @@ public class PlayerAnimation : MonoBehaviour
 {
     private Animator anim;
     private Rigidbody2D rb;
-    private PlayerJump jump;
+    private PlayerMovement movement;
+
+    private bool wasGrounded;
 
     void Awake()
     {
         anim = GetComponent<Animator>();
         rb = GetComponentInParent<Rigidbody2D>();
-        jump = GetComponentInParent<PlayerJump>();
+        movement = GetComponentInParent<PlayerMovement>();
     }
 
-    void Update()
+void Update()
+{
+    float velocityY = rb.linearVelocity.y;
+
+    bool grounded = movement.IsGroundedRaw();
+
+    // 🔥 FORÇA AIRBORNE SE ESTIVER PULANDO
+    if (movement.IsJumping || movement.IsWallJumping)
+        grounded = false;
+
+    anim.SetFloat("Speed", Mathf.Abs(rb.linearVelocity.x));
+
+    float animVelocityY = grounded ? 0 : velocityY;
+    anim.SetFloat("VelocityY", animVelocityY);
+
+    anim.SetBool("isGrounded", grounded);
+
+    // LAND
+    if (!wasGrounded && grounded)
     {
-        float velocityY = rb.linearVelocity.y;
-
-        // parâmetros base
-        anim.SetFloat("Speed", Mathf.Abs(rb.linearVelocity.x));
-        anim.SetFloat("VelocityY", velocityY);
-        anim.SetBool("isGrounded", jump.IsGrounded());
-
-       
-        if (jump.JustLanded && jump.IsGrounded())
-        {
-            anim.ResetTrigger("Land"); // limpa possíveis restos
-            anim.SetTrigger("Land");
-        }
-
-        if (!jump.IsGrounded())
-        {
-            anim.ResetTrigger("Land");
-        }
-
-        
-        AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
-
-        if (state.IsName("playerLand") && !jump.IsGrounded())
-        {
-            anim.Play("Airborne"); // nome do seu blend tree de jump/fall
-        }
+        anim.ResetTrigger("Land");
+        anim.SetTrigger("Land");
     }
 
+    wasGrounded = grounded;
+
+    AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
+
+    if (state.IsName("playerLand") && !grounded)
+    {
+        anim.Play("Airborne");
+    }
+}
     // ===== ATAQUE =====
 
     public void PlayAttack(int step)

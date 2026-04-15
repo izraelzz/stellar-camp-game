@@ -21,16 +21,13 @@ public class PlayerCombat : MonoBehaviour
     public float hitStopTime = 0.08f;
     public float knockbackForce = 6f;
 
-    [Header("Controle durante ataque")]
-    public float attackMoveLock = 0.3f;
-
     private PlayerAnimation anim;
-    private PlayerMovement movement;
+    private Rigidbody2D rb;
 
     void Awake()
     {
         anim = GetComponentInChildren<PlayerAnimation>();
-        movement = GetComponent<PlayerMovement>();
+        rb = GetComponent<Rigidbody2D>();
     }
 
     void Update()
@@ -44,13 +41,9 @@ public class PlayerCombat : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             if (!isAttacking)
-            {
                 StartAttack();
-            }
             else
-            {
                 queuedNext = true;
-            }
         }
     }
 
@@ -64,19 +57,19 @@ public class PlayerCombat : MonoBehaviour
 
         comboTimer = comboResetTime;
 
-        StartCoroutine(AttackMovementLock());
+        StartCoroutine(AttackLock());
 
         anim.PlayAttack(comboStep);
     }
 
-    IEnumerator AttackMovementLock()
+    IEnumerator AttackLock()
     {
-        float originalSpeed = movement.moveSpeed;
-        movement.moveSpeed *= attackMoveLock;
+        float originalGravity = rb.gravityScale;
+
+        // trava movimento horizontal
+        rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
 
         yield return new WaitForSeconds(0.1f);
-
-        movement.moveSpeed = originalSpeed;
     }
 
     // CHAMADO NA ANIMAÇÃO
@@ -92,15 +85,14 @@ public class PlayerCombat : MonoBehaviour
 
         foreach (var hit in hits)
         {
-            Rigidbody2D rb = hit.GetComponent<Rigidbody2D>();
+            Rigidbody2D enemyRb = hit.GetComponent<Rigidbody2D>();
 
-            if (rb != null)
+            if (enemyRb != null)
             {
-                rb.linearVelocity = Vector2.zero;
-                rb.AddForce(dir * (knockbackForce + comboStep * 2f), ForceMode2D.Impulse);
+                enemyRb.linearVelocity = Vector2.zero;
+                enemyRb.AddForce(dir * (knockbackForce + comboStep * 2f), ForceMode2D.Impulse);
             }
 
-            // HITSTOP
             StartCoroutine(HitStop());
         }
     }
@@ -112,7 +104,6 @@ public class PlayerCombat : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    // FINAL DA ANIMAÇÃO
     public void EndAttack()
     {
         isAttacking = false;
