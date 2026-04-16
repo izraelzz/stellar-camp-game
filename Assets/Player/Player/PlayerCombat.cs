@@ -17,16 +17,18 @@ public class PlayerCombat : MonoBehaviour
     private bool isAttacking = false;
     private bool queuedNext = false;
 
+    [Header("Cancel")]
+    public float cancelWindow = 0.15f; // tempo antes de poder cancelar
+    private float attackStartTime;
+
     [Header("Impacto")]
     public float hitStopTime = 0.08f;
     public float knockbackForce = 6f;
 
-    private PlayerAnimation anim;
     private Rigidbody2D rb;
 
     void Awake()
     {
-        anim = GetComponentInChildren<PlayerAnimation>();
         rb = GetComponent<Rigidbody2D>();
     }
 
@@ -45,6 +47,13 @@ public class PlayerCombat : MonoBehaviour
             else
                 queuedNext = true;
         }
+
+        // 🔥 PROCESSA COMBO
+        if (!isAttacking && queuedNext)
+        {
+            queuedNext = false;
+            StartAttack();
+        }
     }
 
     void StartAttack()
@@ -56,23 +65,31 @@ public class PlayerCombat : MonoBehaviour
             comboStep = 1;
 
         comboTimer = comboResetTime;
+        attackStartTime = Time.time;
 
         StartCoroutine(AttackLock());
-
-        anim.PlayAttack(comboStep);
     }
 
     IEnumerator AttackLock()
     {
-        float originalGravity = rb.gravityScale;
-
-        // trava movimento horizontal
         rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
-
         yield return new WaitForSeconds(0.1f);
     }
 
-    // CHAMADO NA ANIMAÇÃO
+    // 🔥 CANCEL COM CONTROLE
+    public bool TryCancelAttack()
+    {
+        if (!isAttacking) return false;
+
+        // só cancela depois de um tempo mínimo
+        if (Time.time - attackStartTime < cancelWindow)
+            return false;
+
+        isAttacking = false;
+        return true;
+    }
+
+    // 🎬 EVENTO
     public void PerformAttack()
     {
         Vector2 dir = Vector2.right * Mathf.Sign(transform.localScale.x);
@@ -104,19 +121,10 @@ public class PlayerCombat : MonoBehaviour
         Time.timeScale = 1f;
     }
 
+    // 🎬 EVENTO FINAL
     public void EndAttack()
     {
         isAttacking = false;
-
-        if (queuedNext)
-        {
-            queuedNext = false;
-            StartAttack();
-        }
-        else
-        {
-            anim.ResetAttack();
-        }
     }
 
     void HandleComboReset()
@@ -126,10 +134,17 @@ public class PlayerCombat : MonoBehaviour
         comboTimer -= Time.deltaTime;
 
         if (comboTimer <= 0)
-        {
             comboStep = 0;
-            anim.ResetAttack();
-        }
+    }
+
+    public bool IsAttacking()
+    {
+        return isAttacking;
+    }
+
+    public int GetComboStep()
+    {
+        return comboStep;
     }
 
     void OnDrawGizmosSelected()
