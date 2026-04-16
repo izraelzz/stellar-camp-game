@@ -10,15 +10,8 @@ public class PlayerController : MonoBehaviour
     private PlayerState currentState;
     private PlayerState lastState;
 
-    private int lastComboStep = 0;
-
     private bool wasFalling;
     private float fallStartTime;
-    private bool wasGrounded;
-
-    // 🔥 LAND CONTROL
-    private float landTimer;
-    private float landDuration = 0.12f;
 
     enum PlayerState
     {
@@ -26,9 +19,9 @@ public class PlayerController : MonoBehaviour
         Run,
         Jump,
         Fall,
-        Falling,
-        Land,
-        Attack
+        MidAir,
+        Attack,
+        Dash
     }
 
     void Awake()
@@ -47,51 +40,23 @@ public class PlayerController : MonoBehaviour
 
     void DecideState()
     {
-        bool grounded = movement.IsGroundedRaw();
+        bool grounded = movement.LastOnGroundTime > 0;
 
-        // 🔥 CANCEL DE ATAQUE COM PULO
+        // 🔥 ATAQUE PRIORIDADE
         if (combat.IsAttacking())
         {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                if (combat.TryCancelAttack())
-                {
-                    movement.OnJumpInput(); // executa pulo
-                }
-            }
-
-            // continua atacando se não cancelou
-            if (combat.IsAttacking())
-            {
-                currentState = PlayerState.Attack;
-                wasGrounded = grounded;
-                return;
-            }
-        }
-
-        // 🔥 DETECTA LAND
-        if (!wasGrounded && grounded)
-        {
-            currentState = PlayerState.Land;
-            landTimer = landDuration;
-            wasGrounded = grounded;
+            currentState = PlayerState.Attack;
             return;
         }
 
-        wasGrounded = grounded;
-
-        // 🔒 SEGURA LAND
-        if (currentState == PlayerState.Land)
+        if (movement.IsDashing)
         {
-            landTimer -= Time.deltaTime;
-
-            if (landTimer > 0)
-                return;
+            currentState = PlayerState.Dash;
+            return;
         }
 
         float yVel = rb.linearVelocity.y;
 
-        // 🟣 NO AR
         if (!grounded)
         {
             if (yVel > 0)
@@ -111,7 +76,7 @@ public class PlayerController : MonoBehaviour
 
             if (Time.time - fallStartTime > 0.15f)
             {
-                currentState = PlayerState.Falling;
+                currentState = PlayerState.MidAir;
                 return;
             }
 
@@ -119,7 +84,6 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // 🟢 NO CHÃO
         wasFalling = false;
 
         float input = Input.GetAxisRaw("Horizontal");
@@ -132,22 +96,22 @@ public class PlayerController : MonoBehaviour
 
     void PlayAnimation()
     {
-        // 🔥 ATAQUE (tratamento especial)
+        // 🔥 ATAQUE TRAVADO
         if (currentState == PlayerState.Attack)
         {
-            int combo = combat.GetComboStep();
+            string attackAnim = combat.GetAttackName();
 
-            if (lastState != PlayerState.Attack || combo != lastComboStep)
+            AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
+
+            if (!state.IsName(attackAnim))
             {
-                anim.Play("Attack" + combo, 0, 0f);
-                lastComboStep = combo;
+                anim.Play(attackAnim, 0, 0f);
             }
 
             lastState = currentState;
             return;
         }
 
-        // 🔥 EVITA REPLAY DESNECESSÁRIO
         if (currentState == lastState) return;
 
         lastState = currentState;
@@ -170,12 +134,12 @@ public class PlayerController : MonoBehaviour
                 anim.Play("Fall");
                 break;
 
-            case PlayerState.Falling:
-                anim.Play("Falling");
+            case PlayerState.MidAir:
+                anim.Play("MidAir");
                 break;
 
-            case PlayerState.Land:
-                anim.Play("Land", 0, 0f);
+            case PlayerState.Dash:
+                anim.Play("Dash");
                 break;
         }
     }

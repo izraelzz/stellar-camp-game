@@ -18,7 +18,7 @@ public class PlayerCombat : MonoBehaviour
     private bool queuedNext = false;
 
     [Header("Cancel")]
-    public float cancelWindow = 0.15f; // tempo antes de poder cancelar
+    public float cancelWindow = 0.15f;
     private float attackStartTime;
 
     [Header("Impacto")]
@@ -26,6 +26,9 @@ public class PlayerCombat : MonoBehaviour
     public float knockbackForce = 6f;
 
     private Rigidbody2D rb;
+
+    // 🔥 ATAQUE TRAVADO
+    private string currentAttackName;
 
     void Awake()
     {
@@ -48,7 +51,6 @@ public class PlayerCombat : MonoBehaviour
                 queuedNext = true;
         }
 
-        // 🔥 PROCESSA COMBO
         if (!isAttacking && queuedNext)
         {
             queuedNext = false;
@@ -60,12 +62,34 @@ public class PlayerCombat : MonoBehaviour
     {
         isAttacking = true;
 
+        // 🔥 só 2 ataques
         comboStep++;
-        if (comboStep > 3)
+        if (comboStep > 2)
             comboStep = 1;
 
         comboTimer = comboResetTime;
         attackStartTime = Time.time;
+
+        // 🔥 DECIDE ATAQUE NO CLIQUE
+        float vertical = Input.GetAxisRaw("Vertical");
+        bool grounded = GetComponent<PlayerMovement>().LastOnGroundTime > 0;
+
+        if (grounded)
+        {
+            if (vertical > 0.5f)
+                currentAttackName = "IdleUpAttack";
+            else
+                currentAttackName = "Attack" + comboStep;
+        }
+        else
+        {
+            if (vertical > 0.5f)
+                currentAttackName = "JumpUpAttack";
+            else if (vertical < -0.5f)
+                currentAttackName = "JumpDownAttack";
+            else
+                currentAttackName = "Attack1";
+        }
 
         StartCoroutine(AttackLock());
     }
@@ -76,12 +100,10 @@ public class PlayerCombat : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
     }
 
-    // 🔥 CANCEL COM CONTROLE
     public bool TryCancelAttack()
     {
         if (!isAttacking) return false;
 
-        // só cancela depois de um tempo mínimo
         if (Time.time - attackStartTime < cancelWindow)
             return false;
 
@@ -89,7 +111,6 @@ public class PlayerCombat : MonoBehaviour
         return true;
     }
 
-    // 🎬 EVENTO
     public void PerformAttack()
     {
         Vector2 dir = Vector2.right * Mathf.Sign(transform.localScale.x);
@@ -121,7 +142,6 @@ public class PlayerCombat : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    // 🎬 EVENTO FINAL
     public void EndAttack()
     {
         isAttacking = false;
@@ -142,9 +162,9 @@ public class PlayerCombat : MonoBehaviour
         return isAttacking;
     }
 
-    public int GetComboStep()
+    public string GetAttackName()
     {
-        return comboStep;
+        return currentAttackName;
     }
 
     void OnDrawGizmosSelected()
