@@ -45,7 +45,6 @@ public class SlimePhysics : MonoBehaviour
             return;
         }
 
-        // 🔥 queda mais rápida estilo Celeste
         if (rb.linearVelocity.y < 0)
         {
             rb.gravityScale = gravityScale * fallMultiplier;

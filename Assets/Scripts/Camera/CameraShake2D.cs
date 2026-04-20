@@ -4,12 +4,9 @@ using Unity.Cinemachine;
 public class CameraShake2D : MonoBehaviour
 {
     public static CameraShake2D Instance;
-
-    // 🔥 FLAG GLOBAL (ESSENCIAL)
     public static bool IsShaking { get; private set; }
 
     private CinemachineBasicMultiChannelPerlin noise;
-
     private float timer;
 
     void Awake()
@@ -17,13 +14,14 @@ public class CameraShake2D : MonoBehaviour
         Instance = this;
 
         var vcam = GetComponent<CinemachineCamera>();
-        noise = vcam.GetComponent<CinemachineBasicMultiChannelPerlin>();
 
-        // 🔥 garante que começa parado
+        noise = GetComponent<CinemachineBasicMultiChannelPerlin>();
+
         if (noise != null)
         {
             noise.AmplitudeGain = 0f;
             noise.FrequencyGain = 0f;
+            
         }
 
         IsShaking = false;
@@ -44,11 +42,14 @@ public class CameraShake2D : MonoBehaviour
 
     public void Shake(float duration, float amplitude, float frequency)
     {
-        if (noise == null) return;
+        if (noise == null)
+        {
+            Debug.LogWarning("NOISE NULL");
+            return;
+        }
 
         timer = duration;
-
-        IsShaking = true; // 🔥 ativa flag
+        IsShaking = true;
 
         noise.AmplitudeGain = amplitude;
         noise.FrequencyGain = frequency;
@@ -61,6 +62,6 @@ public class CameraShake2D : MonoBehaviour
         noise.AmplitudeGain = 0f;
         noise.FrequencyGain = 0f;
 
-        IsShaking = false; // 🔥 desativa flag
+        IsShaking = false;
     }
 }

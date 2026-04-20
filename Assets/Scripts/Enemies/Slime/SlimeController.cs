@@ -42,6 +42,8 @@ public class SlimeController : MonoBehaviour
     public float contactKnockbackSide = 5f;
     public float contactKnockbackSideDown = 2f;
     public float contactCooldown = 0.5f;
+
+    public float verticalTolerance = 1.5f;
     private float lastContactTime;
 
     private SlimeState currentState;
@@ -72,21 +74,18 @@ public class SlimeController : MonoBehaviour
 
     void Update()
     {
-        // 🔥 MORTE
         if (isDead)
         {
             currentState = SlimeState.Death;
             return;
         }
 
-        // 🔥 PLAYER SUMIU
         if (player == null)
         {
             ForceIdle();
             return;
         }
 
-        // 🔥 PLAYER MORREU → perde target
         PlayerHealth ph = player.GetComponent<PlayerHealth>();
         if (ph != null && ph.IsDead)
         {
@@ -104,7 +103,6 @@ public class SlimeController : MonoBehaviour
         currentState = SlimeState.Idle;
         rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
 
-        // 🔥 RESET TOTAL
         isAgro = false;
         isAgroStarting = false;
         isAttacking = false;
@@ -189,9 +187,6 @@ public class SlimeController : MonoBehaviour
         }
     }
 
-    // =========================
-    // 🚶 PATROL
-    // =========================
     void Patrol()
     {
         float leftLimit = startPos.x - patrolDistance;
@@ -224,9 +219,6 @@ public class SlimeController : MonoBehaviour
         }
     }
 
-    // =========================
-    // 👁️ AGRO
-    // =========================
     IEnumerator StartAgro()
     {
         isAgroStarting = true;
@@ -235,19 +227,30 @@ public class SlimeController : MonoBehaviour
         isAgroStarting = false;
     }
 
-    // =========================
-    // 🏃 CHASE
-    // =========================
-    void MoveToPlayer()
+void MoveToPlayer()
+{
+    float verticalDiff = Mathf.Abs(player.position.y - transform.position.y);
+
+    if (verticalDiff > verticalTolerance)
     {
-        float dir = Mathf.Sign(player.position.x - transform.position.x);
-        rb.linearVelocity = new Vector2(dir * moveSpeed, rb.linearVelocity.y);
-        transform.localScale = new Vector3(-dir, 1, 1);
+        rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+        return;
     }
 
-    // =========================
-    // ⚔️ ATTACK
-    // =========================
+    float diff = player.position.x - transform.position.x;
+
+    if (Mathf.Abs(diff) < 0.2f)
+    {
+        rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+        return;
+    }
+
+    float dir = Mathf.Sign(diff);
+
+    rb.linearVelocity = new Vector2(dir * moveSpeed, rb.linearVelocity.y);
+    transform.localScale = new Vector3(-dir, 1, 1);
+}
+
     void TryAttack()
     {
         if (isAttacking || isWindingUp) return;
@@ -272,47 +275,48 @@ public class SlimeController : MonoBehaviour
         isAttacking = false;
     }
 
-    // =========================
-    // 💥 CONTACT DAMAGE
-    // =========================
-    void OnCollisionStay2D(Collision2D collision)
+void OnCollisionStay2D(Collision2D collision)
+{
+    if (!collision.gameObject.CompareTag("Player")) return;
+
+    PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
+    if (playerHealth == null || playerHealth.IsDead) return;
+
+    if (Time.time < lastContactTime + contactCooldown)
+        return;
+
+    ContactPoint2D contact = collision.GetContact(0);
+    Vector2 normal = contact.normal;
+
+    Vector2 knockback;
+
+    if (normal.y > 0.5f)
     {
-        if (!collision.gameObject.CompareTag("Player")) return;
+        float side = Mathf.Sign(collision.transform.position.x - transform.position.x);
 
-        PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
-        if (playerHealth == null || playerHealth.IsDead) return;
+        if (side == 0)
+            side = Random.value < 0.5f ? -1 : 1;
 
-        if (Time.time < lastContactTime + contactCooldown)
-            return;
+        knockback = new Vector2(
+            side * contactKnockbackSide,
+            contactKnockbackUp
+        );
+    }
+    else
+    {
+        float dir = Mathf.Sign(collision.transform.position.x - transform.position.x);
 
-        // Verificar se o player está em cima do slime pela posição Y
-        float playerY = collision.transform.position.y;
-        float slimeY = transform.position.y;
-        
-        Vector2 knockback;
-        
-        // Se o player está em cima do slime (posição Y maior), empurrar para o lado
-        if (playerY > slimeY + 0.3f)
-        {
-            // Empurrar para o lado oposto (esquerda ou direita)
-            float pushDir = Mathf.Sign(collision.transform.position.x - transform.position.x);
-            knockback = new Vector2(pushDir * contactKnockbackSide, -contactKnockbackSideDown);
-        }
-        else
-        {
-            // Player na lateral → knockback normal (para trás e para cima)
-            float dir = Mathf.Sign(collision.transform.position.x - transform.position.x);
-            knockback = new Vector2(dir * contactKnockback, contactKnockbackUp);
-        }
-
-        playerHealth.TakeDamage(contactDamage, knockback);
-
-        lastContactTime = Time.time;
+        knockback = new Vector2(
+            dir * contactKnockback,
+            contactKnockbackUp
+        );
     }
 
-    // =========================
-    // 💥 HIT
-    // =========================
+    playerHealth.TakeDamage(contactDamage, knockback);
+
+    lastContactTime = Time.time;
+}
+
     public void TakeHit(Vector2 knockback)
     {
         if (isDead) return;
@@ -330,9 +334,6 @@ public class SlimeController : MonoBehaviour
         isHit = false;
     }
 
-    // =========================
-    // 💀 DEATH
-    // =========================
     public void Die()
     {
         if (isDead) return;

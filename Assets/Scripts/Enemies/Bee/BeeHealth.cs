@@ -1,17 +1,18 @@
 using UnityEngine;
 
-public class SlimeHealth : MonoBehaviour, IDamageable
+public class BeeHealth : MonoBehaviour, IDamageable
 {
-    public int maxHealth = 3;
+    public int maxHealth = 2;
     private int currentHealth;
 
-    private SlimeController controller;
+    private BeeController controller;
     private HitFlashController flash;
 
     void Awake()
     {
         currentHealth = maxHealth;
-        controller = GetComponent<SlimeController>();
+        controller = GetComponent<BeeController>();
+
         flash = GetComponentInChildren<HitFlashController>();
     }
 
@@ -21,7 +22,7 @@ public class SlimeHealth : MonoBehaviour, IDamageable
 
         currentHealth -= damage;
 
-        Debug.Log("Slime tomou dano! Vida: " + currentHealth);
+        Debug.Log("Bee tomou dano! Vida: " + currentHealth);
 
         flash?.Flash();
 

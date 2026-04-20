@@ -46,28 +46,24 @@ public class PlayerController : MonoBehaviour
     {
         bool grounded = movement.LastOnGroundTime > 0;
 
-        // ☠️ PRIORIDADE MÁXIMA
         if (health.IsDead)
         {
             currentState = PlayerState.Death;
             return;
         }
 
-        // 💥 HIT
         if (health.IsKnocked)
         {
             currentState = PlayerState.Hit;
             return;
         }
 
-        // ⚔️ ATAQUE
         if (combat.IsAttacking())
         {
             currentState = PlayerState.Attack;
             return;
         }
 
-        // 💨 DASH
         if (movement.IsDashing)
         {
             currentState = PlayerState.Dash;
@@ -115,7 +111,6 @@ public class PlayerController : MonoBehaviour
 
 void PlayAnimation()
 {
-    // ☠️ DEATH
     if (currentState == PlayerState.Death)
     {
         if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Death"))
@@ -124,17 +119,15 @@ void PlayAnimation()
         return;
     }
 
-    // 💥 HIT
     if (currentState == PlayerState.Hit)
     {
         if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Hit"))
             anim.Play("Hit", 0, 0f);
 
-        lastState = PlayerState.Hit; // 🔥 salva corretamente
+        lastState = PlayerState.Hit; 
         return;
     }
 
-    // ⚔️ ATAQUE
     if (currentState == PlayerState.Attack)
     {
         string attackAnim = combat.GetAttackName();
@@ -146,7 +139,6 @@ void PlayAnimation()
         return;
     }
 
-    // 🔥 FIX: Se estava em Hit e agora mudou para outro estado, força animação
     bool cameFromHit = (lastState == PlayerState.Hit && currentState != PlayerState.Hit);
     
     if (currentState == lastState && !cameFromHit) return;

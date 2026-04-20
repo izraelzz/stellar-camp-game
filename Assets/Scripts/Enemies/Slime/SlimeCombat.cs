@@ -37,7 +37,7 @@ public class SlimeCombat : MonoBehaviour
 
                 hitPlayers.Add(hit.gameObject);
 
-                // 🎥 CAMERA SHAKE (mais pesado que antes)
+                // camera shake
                 CameraShake2D.Instance?.Shake(0.12f, 1.5f, 12f);
             }
         }

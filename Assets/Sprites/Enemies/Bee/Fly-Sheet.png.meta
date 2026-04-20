@@ -1,10 +1,19 @@
 fileFormatVersion: 2
-guid: 6192f3bdf0c2e7a41993ba3379ed1dec
+guid: c1c510c1afb21eb49bde474e7a92f150
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6947340819181249876
-    second: Captura de tela 2026-04-09 130047_0
+      213: 3578035753372260634
+    second: Fly-Sheet_0
+  - first:
+      213: 7112202210685687137
+    second: Fly-Sheet_1
+  - first:
+      213: -2866658900871460344
+    second: Fly-Sheet_2
+  - first:
+      213: -3606148668801250278
+    second: Fly-Sheet_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +60,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 16
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -100,13 +109,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Captura de tela 2026-04-09 130047_0
+      name: Fly-Sheet_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1919
-        height: 1079
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +124,74 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: caa51236556169f90800000000000000
-      internalID: -6947340819181249876
+      spriteID: a1996697f8cb7a130800000000000000
+      internalID: 3578035753372260634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fly-Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1651ba28a3e93b260800000000000000
+      internalID: 7112202210685687137
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fly-Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 80a4859fae49738d0800000000000000
+      internalID: -2866658900871460344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fly-Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1c8ad454e264fdc0800000000000000
+      internalID: -3606148668801250278
       vertices: []
       indices: 
       edges: []
@@ -125,7 +200,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: bc1ae9a590fa0034883fd2232a95403a
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +210,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Captura de tela 2026-04-09 130047_0: -6947340819181249876
+      Fly-Sheet_0: 3578035753372260634
+      Fly-Sheet_1: 7112202210685687137
+      Fly-Sheet_2: -2866658900871460344
+      Fly-Sheet_3: -3606148668801250278
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

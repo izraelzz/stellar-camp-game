@@ -19,13 +19,13 @@ public class PlayerHealth : MonoBehaviour
     public bool IsKnocked => isKnocked;
 
     private Rigidbody2D rb;
-    private HitFlashController flash; // 🔥 NOVO
+    private HitFlashController flash;
 
     void Awake()
     {
         currentHealth = maxHealth;
         rb = GetComponent<Rigidbody2D>();
-        flash = GetComponentInChildren<HitFlashController>(); // 🔥 pega no visual
+        flash = GetComponentInChildren<HitFlashController>();
     }
 
     public void TakeDamage(int damage, Vector2 knockback)
@@ -36,7 +36,6 @@ public class PlayerHealth : MonoBehaviour
 
         Debug.Log("Player tomou dano! Vida: " + currentHealth);
 
-        // 🔥 FLASH AQUI
         flash?.Flash();
 
         StartCoroutine(HandleKnockback(knockback));

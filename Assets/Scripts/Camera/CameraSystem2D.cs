@@ -50,7 +50,6 @@ public class CameraSystem2D : MonoBehaviour
 
     void HandleLookUpDown()
     {
-        // Check if player is idle (not moving, not jumping, not dashing, not wall jumping)
         bool isIdle = IsPlayerIdle();
 
         if (isIdle)
@@ -59,30 +58,24 @@ public class CameraSystem2D : MonoBehaviour
 
             if (verticalInput > 0)
             {
-                // W pressed - look up
                 targetLookOffsetY = lookOffsetAmount;
             }
             else if (verticalInput < 0)
             {
-                // S pressed - look down
                 targetLookOffsetY = -lookOffsetAmount;
             }
             else
             {
-                // No vertical input - return to center
                 targetLookOffsetY = 0;
             }
         }
         else
         {
-            // Not idle - reset to center
             targetLookOffsetY = 0;
         }
 
-        // Smoothly interpolate the offset
         currentLookOffsetY = Mathf.Lerp(currentLookOffsetY, targetLookOffsetY, Time.deltaTime * lookSmoothSpeed);
 
-        // Apply to camera
         Vector3 offset = composer.TargetOffset;
         offset.y = currentLookOffsetY;
         composer.TargetOffset = offset;
@@ -90,10 +83,8 @@ public class CameraSystem2D : MonoBehaviour
 
     bool IsPlayerIdle()
     {
-        // Check if player is not moving horizontally
         bool notMoving = Mathf.Abs(rb.linearVelocity.x) < 0.1f;
         
-        // Check if player is not in any action state
         bool notJumping = !player.IsJumping;
         bool notDashing = !player.IsDashing;
         bool notWallJumping = !player.IsWallJumping;

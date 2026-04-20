@@ -25,10 +25,6 @@ public class PlayerCombat : MonoBehaviour
     private bool queuedNext = false;
     private bool hasBouncedThisAttack = false;
 
-    [Header("Cancel")]
-    public float cancelWindow = 0.15f;
-    private float attackStartTime;
-
     [Header("Impacto")]
     public float hitStopTime = 0.08f;
     public float knockbackForce = 6f;
@@ -37,8 +33,6 @@ public class PlayerCombat : MonoBehaviour
     [Header("Bounce (Pogo)")]
     public float bounceForce = 10f;
     public float bounceResetY = 0f;
-    public float bounceCooldown = 0.15f;
-    private float lastBounceTime = 0f;
 
     private Rigidbody2D rb;
     private string currentAttackName;
@@ -52,15 +46,6 @@ public class PlayerCombat : MonoBehaviour
     {
         HandleInput();
         HandleComboReset();
-    }
-
-    void ApplyBounce()
-    {
-        lastBounceTime = Time.time;
-        // Zera velocidade vertical pra ficar consistente
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, bounceResetY);
-        // Aplica impulso pra cima
-        rb.AddForce(Vector2.up * bounceForce, ForceMode2D.Impulse);
     }
 
     void HandleInput()
@@ -82,12 +67,11 @@ public class PlayerCombat : MonoBehaviour
 
     void StartAttack()
     {
-        // Verificar cooldown entre ataques
         if (lastAttackTime > 0 && Time.time < lastAttackTime + attackCooldown)
             return;
 
         isAttacking = true;
-        hasBouncedThisAttack = false; // 🔥 reset bounce
+        hasBouncedThisAttack = false;
         lastAttackTime = Time.time;
 
         comboStep++;
@@ -95,7 +79,6 @@ public class PlayerCombat : MonoBehaviour
             comboStep = 1;
 
         comboTimer = comboResetTime;
-        attackStartTime = Time.time;
 
         float vertical = Input.GetAxisRaw("Vertical");
         bool grounded = GetComponent<PlayerMovement>().LastOnGroundTime > 0;
@@ -117,7 +100,6 @@ public class PlayerCombat : MonoBehaviour
                 currentAttackName = "Attack1";
         }
 
-        // Selecionar o attack point correto baseado na direção
         if (vertical > 0.5f)
             currentAttackPoint = attackPointUp;
         else if (vertical < -0.5f)
@@ -134,12 +116,15 @@ public class PlayerCombat : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
     }
 
+    void ApplyBounce()
+    {
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, bounceResetY);
+        rb.AddForce(Vector2.up * bounceForce, ForceMode2D.Impulse);
+    }
+
     public void PerformAttack()
     {
-        // Usar o attack point correto para a direção do ataque
         Transform activePoint = currentAttackPoint != null ? currentAttackPoint : attackPoint;
-        
-        Vector2 dir = Vector2.right * Mathf.Sign(transform.localScale.x);
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(
             activePoint.position,
@@ -148,45 +133,66 @@ public class PlayerCombat : MonoBehaviour
         );
 
         bool hitSomething = false;
-
-        // 🔥 evita duplicar hit no mesmo inimigo
         HashSet<GameObject> hitEnemies = new HashSet<GameObject>();
 
         foreach (var hit in hits)
         {
             if (hitEnemies.Contains(hit.gameObject)) continue;
 
-            SlimeHealth slime = hit.GetComponent<SlimeHealth>();
+            IDamageable damageable = hit.GetComponentInParent<IDamageable>();
 
-            if (slime != null)
+            if (damageable != null)
             {
-                // 🔥 Knockback menor no pogo
-                float currentKnockback = (currentAttackName == "JumpDownAttack") ? pogoKnockbackForce : (knockbackForce + comboStep * 2f);
+                Vector2 dir;
+
+                if (currentAttackName == "JumpUpAttack" || currentAttackName == "IdleUpAttack")
+                {
+    
+                    float x = Mathf.Sign(transform.localScale.x) * 0.3f;
+                    dir = new Vector2(x, 1f).normalized;
+                }
+                else if (currentAttackName == "JumpDownAttack")
+                {
+                    dir = Vector2.down;
+                }
+                else
+                {
+                    dir = Vector2.right * Mathf.Sign(transform.localScale.x);
+                }
+
+                float currentKnockback = (currentAttackName == "JumpDownAttack")
+                    ? pogoKnockbackForce
+                    : (knockbackForce + comboStep * 2f);
+
                 Vector2 knockback = dir * currentKnockback;
 
-                slime.TakeDamage(damage, knockback);
+                damageable.TakeDamage(damage, knockback);
+
                 hitEnemies.Add(hit.gameObject);
                 hitSomething = true;
 
-                // 🔥 POGO SÓ se inimigo estiver ABAIXO do player
-                bool isEnemyBelow = hit.transform.position.y < transform.position.y - 0.1f;
-                if (currentAttackName == "JumpDownAttack" && isEnemyBelow && !hasBouncedThisAttack && rb.linearVelocity.y <= 0)
-                {
-                    ApplyBounce();
-                    hasBouncedThisAttack = true;
-                }
+                HandleBounce(hit.transform);
             }
         }
 
         if (hitSomething)
         {
             StartCoroutine(HitStop());
-
-            // 🎥 CAMERA SHAKE escalável
-            float strength = 1.2f + comboStep * 0.8f;
-            float duration = 0.08f + comboStep * 0.04f;
-
             CameraShake2D.Instance?.Shake(0.1f, 1.2f, 15f);
+        }
+    }
+
+    void HandleBounce(Transform enemy)
+    {
+        bool isEnemyBelow = enemy.position.y < transform.position.y - 0.1f;
+
+        if (currentAttackName == "JumpDownAttack"
+            && isEnemyBelow
+            && !hasBouncedThisAttack
+            && rb.linearVelocity.y <= 0)
+        {
+            ApplyBounce();
+            hasBouncedThisAttack = true;
         }
     }
 
@@ -224,9 +230,17 @@ public class PlayerCombat : MonoBehaviour
         return currentAttackName;
     }
 
-    void OnDrawGizmosSelected()
-    {
-        if (attackPoint == null) return;
+void OnDrawGizmosSelected()
+{
+    Gizmos.color = Color.red;
+
+    if (attackPoint != null)
         Gizmos.DrawWireSphere(attackPoint.position, attackRange);
-    }
+
+    if (attackPointUp != null)
+        Gizmos.DrawWireSphere(attackPointUp.position, attackRange);
+
+    if (attackPointDown != null)
+        Gizmos.DrawWireSphere(attackPointDown.position, attackRange);
+}
 }

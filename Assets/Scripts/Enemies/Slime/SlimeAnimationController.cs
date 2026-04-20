@@ -22,7 +22,6 @@ public class SlimeAnimationController : MonoBehaviour
     {
         var state = slime.GetState();
 
-        // 🔥 DEATH TEM PRIORIDADE ABSOLUTA
         if (state == SlimeController.SlimeState.Death)
         {
             if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Death"))

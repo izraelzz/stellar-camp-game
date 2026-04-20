@@ -1,19 +1,19 @@
 fileFormatVersion: 2
-guid: c1c510c1afb21eb49bde474e7a92f150
+guid: ade18c0a4a8cd7f46b27a8f6ded0b122
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3578035753372260634
-    second: Fly-Sheet_0
+      213: -7980351618680381734
+    second: Attack-Sheet_0
   - first:
-      213: 7112202210685687137
-    second: Fly-Sheet_1
+      213: 6951178911378622742
+    second: Attack-Sheet_1
   - first:
-      213: -2866658900871460344
-    second: Fly-Sheet_2
+      213: 5875453275367695068
+    second: Attack-Sheet_2
   - first:
-      213: -3606148668801250278
-    second: Fly-Sheet_3
+      213: -4804304518213913706
+    second: Attack-Sheet_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -109,13 +109,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Fly-Sheet_0
+      name: Attack-Sheet_0
       rect:
         serializedVersion: 2
-        x: 20
-        y: 18
-        width: 22
-        height: 42
+        x: 0
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -124,20 +124,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a1996697f8cb7a130800000000000000
-      internalID: 3578035753372260634
+      spriteID: ade97d90c78104190800000000000000
+      internalID: -7980351618680381734
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Fly-Sheet_1
+      name: Attack-Sheet_1
       rect:
         serializedVersion: 2
-        x: 84
-        y: 19
-        width: 37
-        height: 30
+        x: 64
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -146,20 +146,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1651ba28a3e93b260800000000000000
-      internalID: 7112202210685687137
+      spriteID: 619c8e6146c877060800000000000000
+      internalID: 6951178911378622742
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Fly-Sheet_2
+      name: Attack-Sheet_2
       rect:
         serializedVersion: 2
-        x: 147
-        y: 19
-        width: 31
-        height: 23
+        x: 128
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -168,20 +168,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 80a4859fae49738d0800000000000000
-      internalID: -2866658900871460344
+      spriteID: cd262bcdf9dc98150800000000000000
+      internalID: 5875453275367695068
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Fly-Sheet_3
+      name: Attack-Sheet_3
       rect:
         serializedVersion: 2
-        x: 212
-        y: 19
-        width: 38
-        height: 39
+        x: 192
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -190,8 +190,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a1c8ad454e264fdc0800000000000000
-      internalID: -3606148668801250278
+      spriteID: 6933e07be7ea35db0800000000000000
+      internalID: -4804304518213913706
       vertices: []
       indices: 
       edges: []
@@ -200,7 +200,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 1f416bad6c11a8445b233143922584df
     internalID: 0
     vertices: []
     indices: 
@@ -210,10 +210,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Fly-Sheet_0: 3578035753372260634
-      Fly-Sheet_1: 7112202210685687137
-      Fly-Sheet_2: -2866658900871460344
-      Fly-Sheet_3: -3606148668801250278
+      Attack-Sheet_0: -7980351618680381734
+      Attack-Sheet_1: 6951178911378622742
+      Attack-Sheet_2: 5875453275367695068
+      Attack-Sheet_3: -4804304518213913706
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

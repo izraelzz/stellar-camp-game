@@ -21,7 +21,6 @@ public class HitFlashController : MonoBehaviour
     {
         SpriteRenderer sr = GetComponent<SpriteRenderer>();
 
-        // 🔥 IMPORTANTE: instancia material (não usar sharedMaterial)
         mat = sr.material;
     }
 
@@ -41,7 +40,6 @@ public class HitFlashController : MonoBehaviour
         {
             float t = time / duration;
 
-            // 🔥 curva suave estilo Hollow Knight
             float strength = flashCurve.Evaluate(t);
 
             mat.SetFloat("_HitStrength", strength);
