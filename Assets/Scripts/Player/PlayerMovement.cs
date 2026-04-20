@@ -58,6 +58,8 @@ public class PlayerMovement : MonoBehaviour
 	[SerializeField] private Transform _frontWallCheckPoint;
 	[SerializeField] private Transform _backWallCheckPoint;
 	[SerializeField] private Vector2 _wallCheckSize = new Vector2(0.5f, 1f);
+
+	private PlayerHealth health;
     #endregion
 
     #region LAYERS & TAGS
@@ -68,6 +70,7 @@ public class PlayerMovement : MonoBehaviour
     private void Awake()
 	{
 		RB = GetComponent<Rigidbody2D>();
+		health = GetComponent<PlayerHealth>();
 	}
 
 	private void Start()
@@ -79,6 +82,13 @@ public class PlayerMovement : MonoBehaviour
 
 	private void Update()
 	{
+
+if (health != null && health.IsKnocked)
+{
+    _moveInput = Vector2.zero;
+    return;
+}
+
         #region TIMERS
         LastOnGroundTime -= Time.deltaTime;
 		LastOnWallTime -= Time.deltaTime;
@@ -261,25 +271,29 @@ public class PlayerMovement : MonoBehaviour
 		#endregion
     }
 
-    private void FixedUpdate()
-	{
-		//Handle Run
-		if (!IsDashing)
-		{
-			if (IsWallJumping)
-				Run(Data.wallJumpRunLerp);
-			else
-				Run(1);
-		}
-		else if (_isDashAttacking)
-		{
-			Run(Data.dashEndRunLerp);
-		}
+private void FixedUpdate()
+{
+    // 🚫 NÃO deixa o player se mover durante knockback
+    if (health != null && health.IsKnocked)
+        return;
 
-		//Handle Slide
-		if (IsSliding)
-			Slide();
+    //Handle Run
+    if (!IsDashing)
+    {
+        if (IsWallJumping)
+            Run(Data.wallJumpRunLerp);
+        else
+            Run(1);
     }
+    else if (_isDashAttacking)
+    {
+        Run(Data.dashEndRunLerp);
+    }
+
+    //Handle Slide
+    if (IsSliding)
+        Slide();
+}
 
     #region INPUT CALLBACKS
 	//Methods which whandle input detected in Update()

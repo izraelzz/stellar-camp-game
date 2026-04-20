@@ -4,6 +4,7 @@ public class PlayerController : MonoBehaviour
 {
     private PlayerMovement movement;
     private PlayerCombat combat;
+    private PlayerHealth health;
     private Animator anim;
     private Rigidbody2D rb;
 
@@ -21,13 +22,16 @@ public class PlayerController : MonoBehaviour
         Fall,
         MidAir,
         Attack,
-        Dash
+        Dash,
+        Hit,
+        Death
     }
 
     void Awake()
     {
         movement = GetComponent<PlayerMovement>();
         combat = GetComponent<PlayerCombat>();
+        health = GetComponent<PlayerHealth>();
         anim = GetComponentInChildren<Animator>();
         rb = GetComponent<Rigidbody2D>();
     }
@@ -42,13 +46,28 @@ public class PlayerController : MonoBehaviour
     {
         bool grounded = movement.LastOnGroundTime > 0;
 
-        // 🔥 ATAQUE PRIORIDADE
+        // ☠️ PRIORIDADE MÁXIMA
+        if (health.IsDead)
+        {
+            currentState = PlayerState.Death;
+            return;
+        }
+
+        // 💥 HIT
+        if (health.IsKnocked)
+        {
+            currentState = PlayerState.Hit;
+            return;
+        }
+
+        // ⚔️ ATAQUE
         if (combat.IsAttacking())
         {
             currentState = PlayerState.Attack;
             return;
         }
 
+        // 💨 DASH
         if (movement.IsDashing)
         {
             currentState = PlayerState.Dash;
@@ -94,53 +113,71 @@ public class PlayerController : MonoBehaviour
             currentState = PlayerState.Idle;
     }
 
-    void PlayAnimation()
+void PlayAnimation()
+{
+    // ☠️ DEATH
+    if (currentState == PlayerState.Death)
     {
-        // 🔥 ATAQUE TRAVADO
-        if (currentState == PlayerState.Attack)
-        {
-            string attackAnim = combat.GetAttackName();
+        if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Death"))
+            anim.Play("Death", 0, 0f);
 
-            AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
+        return;
+    }
 
-            if (!state.IsName(attackAnim))
-            {
-                anim.Play(attackAnim, 0, 0f);
-            }
+    // 💥 HIT
+    if (currentState == PlayerState.Hit)
+    {
+        if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Hit"))
+            anim.Play("Hit", 0, 0f);
 
-            lastState = currentState;
-            return;
-        }
+        lastState = PlayerState.Hit; // 🔥 salva corretamente
+        return;
+    }
 
-        if (currentState == lastState) return;
+    // ⚔️ ATAQUE
+    if (currentState == PlayerState.Attack)
+    {
+        string attackAnim = combat.GetAttackName();
+
+        if (!anim.GetCurrentAnimatorStateInfo(0).IsName(attackAnim))
+            anim.Play(attackAnim, 0, 0f);
 
         lastState = currentState;
-
-        switch (currentState)
-        {
-            case PlayerState.Idle:
-                anim.Play("Idle");
-                break;
-
-            case PlayerState.Run:
-                anim.Play("Run");
-                break;
-
-            case PlayerState.Jump:
-                anim.Play("Jump");
-                break;
-
-            case PlayerState.Fall:
-                anim.Play("Fall");
-                break;
-
-            case PlayerState.MidAir:
-                anim.Play("MidAir");
-                break;
-
-            case PlayerState.Dash:
-                anim.Play("Dash");
-                break;
-        }
+        return;
     }
+
+    // 🔥 FIX: Se estava em Hit e agora mudou para outro estado, força animação
+    bool cameFromHit = (lastState == PlayerState.Hit && currentState != PlayerState.Hit);
+    
+    if (currentState == lastState && !cameFromHit) return;
+
+    lastState = currentState;
+
+    switch (currentState)
+    {
+        case PlayerState.Idle:
+            anim.Play("Idle");
+            break;
+
+        case PlayerState.Run:
+            anim.Play("Run");
+            break;
+
+        case PlayerState.Jump:
+            anim.Play("Jump");
+            break;
+
+        case PlayerState.Fall:
+            anim.Play("Fall");
+            break;
+
+        case PlayerState.MidAir:
+            anim.Play("MidAir");
+            break;
+
+        case PlayerState.Dash:
+            anim.Play("Dash");
+            break;
+    }
+}
 }
