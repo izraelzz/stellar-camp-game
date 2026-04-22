@@ -8,6 +8,8 @@ public class SlimeHealth : MonoBehaviour, IDamageable
     private SlimeController controller;
     private HitFlashController flash;
 
+    public MobSound mobSound;
+
     void Awake()
     {
         currentHealth = maxHealth;
@@ -22,6 +24,8 @@ public class SlimeHealth : MonoBehaviour, IDamageable
         currentHealth -= damage;
 
         Debug.Log("Slime tomou dano! Vida: " + currentHealth);
+
+        mobSound?.PlayHit();
 
         flash?.Flash();
 

@@ -44,6 +44,8 @@ public class SlimeController : MonoBehaviour
     public float contactCooldown = 0.5f;
 
     public float verticalTolerance = 1.5f;
+
+    public MobSound mobSound;
     private float lastContactTime;
 
     private SlimeState currentState;
@@ -339,6 +341,7 @@ void OnCollisionStay2D(Collision2D collision)
         if (isDead) return;
 
         isDead = true;
+        mobSound?.PlayDeath();
         currentState = SlimeState.Death;
 
         rb.linearVelocity = Vector2.zero;

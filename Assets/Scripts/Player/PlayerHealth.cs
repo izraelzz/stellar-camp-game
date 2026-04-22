@@ -18,8 +18,13 @@ public class PlayerHealth : MonoBehaviour
 
     public bool IsKnocked => isKnocked;
 
+    [Header("HitStop")]
+    public float hitStopTime = 0.12f;
+
     private Rigidbody2D rb;
     private HitFlashController flash;
+
+    public PlayerSound playerSound;
 
     void Awake()
     {
@@ -36,7 +41,11 @@ public class PlayerHealth : MonoBehaviour
 
         Debug.Log("Player tomou dano! Vida: " + currentHealth);
 
+        playerSound?.PlayHit(); 
+
         flash?.Flash();
+
+        StartCoroutine(HitStop());
 
         StartCoroutine(HandleKnockback(knockback));
         StartCoroutine(Invincibility());
@@ -45,6 +54,15 @@ public class PlayerHealth : MonoBehaviour
         {
             Die();
         }
+    }
+
+    IEnumerator HitStop()
+    {
+        float originalTime = Time.timeScale;
+
+        Time.timeScale = 0f;
+        yield return new WaitForSecondsRealtime(hitStopTime);
+        Time.timeScale = originalTime;
     }
 
     IEnumerator HandleKnockback(Vector2 knockback)
@@ -66,13 +84,16 @@ public class PlayerHealth : MonoBehaviour
         isInvincible = false;
     }
 
-    void Die()
-    {
-        IsDead = true;
+void Die()
+{
+    IsDead = true;
 
-        rb.linearVelocity = Vector2.zero;
-        rb.bodyType = RigidbodyType2D.Kinematic;
+    rb.linearVelocity = Vector2.zero;
+    rb.bodyType = RigidbodyType2D.Dynamic;
+    rb.gravityScale = 3f;
 
-        Debug.Log("Player morreu");
-    }
+    rb.AddForce(new Vector2(0, 5f), ForceMode2D.Impulse);
+
+    Debug.Log("Player morreu");
+}
 }

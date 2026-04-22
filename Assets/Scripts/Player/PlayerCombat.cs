@@ -37,6 +37,8 @@ public class PlayerCombat : MonoBehaviour
     private Rigidbody2D rb;
     private string currentAttackName;
 
+    public PlayerSound playerSound;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -78,6 +80,8 @@ public class PlayerCombat : MonoBehaviour
         if (comboStep > 2)
             comboStep = 1;
 
+        playerSound?.PlayAttack();
+
         comboTimer = comboResetTime;
 
         float vertical = Input.GetAxisRaw("Vertical");
@@ -97,7 +101,7 @@ public class PlayerCombat : MonoBehaviour
             else if (vertical < -0.5f)
                 currentAttackName = "JumpDownAttack";
             else
-                currentAttackName = "Attack1";
+                currentAttackName = "Attack" + comboStep;
         }
 
         if (vertical > 0.5f)
@@ -147,7 +151,6 @@ public class PlayerCombat : MonoBehaviour
 
                 if (currentAttackName == "JumpUpAttack" || currentAttackName == "IdleUpAttack")
                 {
-    
                     float x = Mathf.Sign(transform.localScale.x) * 0.3f;
                     dir = new Vector2(x, 1f).normalized;
                 }
@@ -230,17 +233,17 @@ public class PlayerCombat : MonoBehaviour
         return currentAttackName;
     }
 
-void OnDrawGizmosSelected()
-{
-    Gizmos.color = Color.red;
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
 
-    if (attackPoint != null)
-        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
+        if (attackPoint != null)
+            Gizmos.DrawWireSphere(attackPoint.position, attackRange);
 
-    if (attackPointUp != null)
-        Gizmos.DrawWireSphere(attackPointUp.position, attackRange);
+        if (attackPointUp != null)
+            Gizmos.DrawWireSphere(attackPointUp.position, attackRange);
 
-    if (attackPointDown != null)
-        Gizmos.DrawWireSphere(attackPointDown.position, attackRange);
-}
+        if (attackPointDown != null)
+            Gizmos.DrawWireSphere(attackPointDown.position, attackRange);
+    }
 }

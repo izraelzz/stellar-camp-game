@@ -8,6 +8,8 @@ public class BeeHealth : MonoBehaviour, IDamageable
     private BeeController controller;
     private HitFlashController flash;
 
+    public MobSound mobSound;
+
     void Awake()
     {
         currentHealth = maxHealth;
@@ -23,6 +25,8 @@ public class BeeHealth : MonoBehaviour, IDamageable
         currentHealth -= damage;
 
         Debug.Log("Bee tomou dano! Vida: " + currentHealth);
+
+        mobSound?.PlayHit();
 
         flash?.Flash();
 

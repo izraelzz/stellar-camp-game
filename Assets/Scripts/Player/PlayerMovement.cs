@@ -60,6 +60,11 @@ public class PlayerMovement : MonoBehaviour
 	[SerializeField] private Vector2 _wallCheckSize = new Vector2(0.5f, 1f);
 
 	private PlayerHealth health;
+
+	[SerializeField] private Transform visual;
+
+	public PlayerSound playerSound;
+	private float stepTimer;
     #endregion
 
     #region LAYERS & TAGS
@@ -102,6 +107,17 @@ if (health != null && health.IsKnocked)
 		#region INPUT HANDLER
 		_moveInput.x = Input.GetAxisRaw("Horizontal");
 		_moveInput.y = Input.GetAxisRaw("Vertical");
+
+		if (Mathf.Abs(_moveInput.x) > 0.1f && LastOnGroundTime > 0)
+{
+    stepTimer -= Time.deltaTime;
+
+    if (stepTimer <= 0f)
+    {
+        playerSound?.PlayFootstep();
+        stepTimer = 0.4f;
+    }
+}
 
 		if (_moveInput.x != 0)
 			CheckDirectionToFace(_moveInput.x > 0);
@@ -391,15 +407,14 @@ private void FixedUpdate()
 		*/
 	}
 
-	private void Turn()
-	{
-		//stores scale and flips the player along the x axis, 
-		Vector3 scale = transform.localScale; 
-		scale.x *= -1;
-		transform.localScale = scale;
+private void Turn()
+{
+    IsFacingRight = !IsFacingRight;
 
-		IsFacingRight = !IsFacingRight;
-	}
+    Vector3 scale = visual.localScale;
+    scale.x = Mathf.Abs(scale.x) * (IsFacingRight ? 1 : -1);
+    visual.localScale = scale;
+}
     #endregion
 
     #region JUMP METHODS
@@ -418,6 +433,7 @@ private void FixedUpdate()
 			force -= RB.linearVelocity.y;
 
 		RB.AddForce(Vector2.up * force, ForceMode2D.Impulse);
+		playerSound?.PlayJump();
 		#endregion
 	}
 
@@ -455,6 +471,8 @@ private void FixedUpdate()
 
 		LastOnGroundTime = 0;
 		LastPressedDashTime = 0;
+
+		playerSound?.PlayDash();
 
 		float startTime = Time.time;
 

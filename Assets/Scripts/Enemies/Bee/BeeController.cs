@@ -14,6 +14,11 @@ public class BeeController : MonoBehaviour
     [Header("Movimento")]
     public float flySpeed = 3.5f;
 
+    [Header("Evitar chão")]
+    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private float groundCheckDistance = 1.5f;
+    [SerializeField] private float minHeightFromGround = 1.2f;
+
     [Header("Ataque")]
     public float attackTriggerRange = 4f;
     public float attackCooldown = 1.5f;
@@ -34,6 +39,8 @@ public class BeeController : MonoBehaviour
     public float deathTorque = 200f;
     public float deathGravity = 2.5f;
     public float deathDestroyTime = 2f;
+
+    public MobSound mobSound;
 
     private float lastAttackTime;
     private bool isAttacking = false;
@@ -126,21 +133,34 @@ public class BeeController : MonoBehaviour
             case BeeState.Chase:
                 ChasePlayer();
                 break;
-
-            case BeeState.Attack:
-                break;
-
-            case BeeState.Hit:
-                break;
-
-            case BeeState.Death:
-                break;
         }
+    }
+
+    bool IsTooCloseToGround()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(
+            transform.position,
+            Vector2.down,
+            groundCheckDistance,
+            groundLayer
+        );
+
+        if (hit)
+            return hit.distance < minHeightFromGround;
+
+        return false;
     }
 
     void ChasePlayer()
     {
         Vector2 dir = (player.position - transform.position).normalized;
+
+        // 🚫 evita descer demais
+        if (IsTooCloseToGround() && dir.y < 0)
+        {
+            dir.y = 0.5f;
+        }
+
         rb.linearVelocity = dir * flySpeed;
 
         if (dir.x != 0)
@@ -174,7 +194,6 @@ public class BeeController : MonoBehaviour
 
         Vector2 rawDir = (lockedTargetPosition - (Vector2)transform.position).normalized;
 
-
         float minY = -0.3f;
         if (rawDir.y < minY)
         {
@@ -199,7 +218,6 @@ public class BeeController : MonoBehaviour
         isAttacking = false;
     }
 
-
     public void TakeHit(Vector2 knockback)
     {
         if (isDead) return;
@@ -217,12 +235,12 @@ public class BeeController : MonoBehaviour
         isHit = false;
     }
 
-
     public void Die()
     {
         if (isDead) return;
 
         isDead = true;
+        mobSound?.PlayDeath();
         currentState = BeeState.Death;
 
         StopAllCoroutines();
@@ -246,7 +264,6 @@ public class BeeController : MonoBehaviour
         Destroy(gameObject, deathDestroyTime);
     }
 
-
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (!isDead || hasLanded) return;
@@ -260,7 +277,6 @@ public class BeeController : MonoBehaviour
             rb.freezeRotation = true;
         }
     }
-
 
     public BeeState GetState() => currentState;
     public bool IsDead() => isDead;
