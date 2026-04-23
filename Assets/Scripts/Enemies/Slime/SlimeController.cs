@@ -53,6 +53,7 @@ public class SlimeController : MonoBehaviour
     private bool isDead = false;
     private bool isAttacking = false;
     private bool isHit = false;
+    public int scoreValue = 10;
 
     public enum SlimeState
     {
@@ -343,6 +344,7 @@ void OnCollisionStay2D(Collision2D collision)
         isDead = true;
         mobSound?.PlayDeath();
         currentState = SlimeState.Death;
+        ScoreManager.Instance.AddScore(scoreValue);
 
         rb.linearVelocity = Vector2.zero;
         rb.bodyType = RigidbodyType2D.Kinematic;

@@ -17,8 +17,8 @@ TagManager:
   - TriggerArea
   - CameraBounds
   - Ground
-  - 
-  - 
+  - Light
+  - Front
   - 
   - 
   - 
@@ -41,6 +41,12 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Light
+    uniqueID: 2356995529
+    locked: 0
+  - name: Front
+    uniqueID: 2291789297
     locked: 0
   m_RenderingLayers:
   - Default

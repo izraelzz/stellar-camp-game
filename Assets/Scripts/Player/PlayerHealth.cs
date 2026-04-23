@@ -25,10 +25,12 @@ public class PlayerHealth : MonoBehaviour
     private HitFlashController flash;
 
     public PlayerSound playerSound;
+    public HeartUI heartUI;
 
     void Awake()
     {
         currentHealth = maxHealth;
+        heartUI?.UpdateHearts(currentHealth);
         rb = GetComponent<Rigidbody2D>();
         flash = GetComponentInChildren<HitFlashController>();
     }
@@ -38,6 +40,8 @@ public class PlayerHealth : MonoBehaviour
         if (isInvincible) return;
 
         currentHealth -= damage;
+
+        heartUI?.UpdateHearts(currentHealth);
 
         Debug.Log("Player tomou dano! Vida: " + currentHealth);
 

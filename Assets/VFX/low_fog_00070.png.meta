@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: abe65ae4c6c6b5f45b8dd8aa1fdf155a
+guid: 280e37ef9b49b52418eaa49708409449
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6783186832121891367
-    second: Bellwall_breakable0002_0
+      213: -4946561885934595405
+    second: low_fog_00070_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -72,10 +72,10 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 4096
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Bellwall_breakable0002_0
+      name: low_fog_00070_0
       rect:
         serializedVersion: 2
-        x: 33
-        y: 18
-        width: 356
-        height: 549
+        x: 10
+        y: 19
+        width: 399
+        height: 57
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 72a8bb52c78b22e50800000000000000
-      internalID: 6783186832121891367
+      spriteID: 3b2d1693c284a5bb0800000000000000
+      internalID: -4946561885934595405
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Bellwall_breakable0002_0: 6783186832121891367
+      low_fog_00070_0: -4946561885934595405
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

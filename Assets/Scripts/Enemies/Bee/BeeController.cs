@@ -55,6 +55,7 @@ public class BeeController : MonoBehaviour
     private BeeState currentState;
 
     private Vector2 lockedTargetPosition;
+    public int scoreValue = 15;
 
     public enum BeeState
     {
@@ -242,6 +243,7 @@ public class BeeController : MonoBehaviour
         isDead = true;
         mobSound?.PlayDeath();
         currentState = BeeState.Death;
+        ScoreManager.Instance.AddScore(scoreValue);
 
         StopAllCoroutines();
 
