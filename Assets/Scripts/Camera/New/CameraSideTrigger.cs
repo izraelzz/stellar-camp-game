@@ -21,7 +21,7 @@ private void OnTriggerStay2D(Collider2D collision)
 
     bool currentlyRight = playerX > triggerX;
 
-    // Só troca se mudou de lado
+  
     if (currentlyRight != isOnRightSide)
     {
         isOnRightSide = currentlyRight;

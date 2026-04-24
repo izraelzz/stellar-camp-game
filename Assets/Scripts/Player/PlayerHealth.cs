@@ -1,8 +1,10 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class PlayerHealth : MonoBehaviour
 {
+    [Header("Vida")]
     public int maxHealth = 5;
     private int currentHealth;
 
@@ -21,6 +23,11 @@ public class PlayerHealth : MonoBehaviour
     [Header("HitStop")]
     public float hitStopTime = 0.12f;
 
+    [Header("Morte")]
+    public ScreenFade fade;
+    public float deathDelay = 0.6f;
+    public MonoBehaviour playerControl; // arrasta seu script de movimento aqui
+
     private Rigidbody2D rb;
     private HitFlashController flash;
 
@@ -31,26 +38,24 @@ public class PlayerHealth : MonoBehaviour
     {
         currentHealth = maxHealth;
         heartUI?.UpdateHearts(currentHealth);
+
         rb = GetComponent<Rigidbody2D>();
         flash = GetComponentInChildren<HitFlashController>();
     }
 
     public void TakeDamage(int damage, Vector2 knockback)
     {
-        if (isInvincible) return;
+        if (isInvincible || IsDead) return;
 
         currentHealth -= damage;
-
         heartUI?.UpdateHearts(currentHealth);
 
         Debug.Log("Player tomou dano! Vida: " + currentHealth);
 
-        playerSound?.PlayHit(); 
-
+        playerSound?.PlayHit();
         flash?.Flash();
 
         StartCoroutine(HitStop());
-
         StartCoroutine(HandleKnockback(knockback));
         StartCoroutine(Invincibility());
 
@@ -88,16 +93,35 @@ public class PlayerHealth : MonoBehaviour
         isInvincible = false;
     }
 
-void Die()
-{
-    IsDead = true;
+    void Die()
+    {
+        if (IsDead) return;
 
-    rb.linearVelocity = Vector2.zero;
-    rb.bodyType = RigidbodyType2D.Dynamic;
-    rb.gravityScale = 3f;
+        IsDead = true;
 
-    rb.AddForce(new Vector2(0, 5f), ForceMode2D.Impulse);
+        // trava controle do player
+        if (playerControl != null)
+            playerControl.enabled = false;
 
-    Debug.Log("Player morreu");
-}
+        rb.linearVelocity = Vector2.zero;
+        rb.bodyType = RigidbodyType2D.Dynamic;
+        rb.gravityScale = 3f;
+
+        
+        rb.AddForce(new Vector2(0, 5f), ForceMode2D.Impulse);
+
+        Debug.Log("Player morreu");
+
+        StartCoroutine(DeathRoutine());
+    }
+
+    IEnumerator DeathRoutine()
+    {
+        yield return new WaitForSeconds(deathDelay);
+
+        if (fade != null)
+            yield return fade.FadeIn();
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
 }

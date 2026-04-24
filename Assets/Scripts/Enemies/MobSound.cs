@@ -6,6 +6,7 @@ public class MobSound : MonoBehaviour
 
     public AudioClip hit;
     public AudioClip death;
+    public AudioClip windup; 
 
     public void PlayHit()
     {
@@ -15,5 +16,10 @@ public class MobSound : MonoBehaviour
     public void PlayDeath()
     {
         audioSource.PlayOneShot(death);
+    }
+
+    public void PlayWindup()
+    {
+        audioSource.PlayOneShot(windup);
     }
 }

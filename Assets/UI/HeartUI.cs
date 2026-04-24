@@ -23,7 +23,7 @@ public class HeartUI : MonoBehaviour
 
                     if (effect != null)
                     {
-                        effect.PlayLoseEffect(); // 🔥 efeito bonito
+                        effect.PlayLoseEffect();
                     }
                     else
                     {

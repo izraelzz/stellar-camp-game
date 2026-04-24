@@ -48,7 +48,7 @@ public class HitFlashController : MonoBehaviour
             yield return null;
         }
 
-        // garante reset
+        
         mat.SetFloat("_HitStrength", 0);
     }
 }

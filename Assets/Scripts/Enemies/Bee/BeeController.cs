@@ -156,7 +156,6 @@ public class BeeController : MonoBehaviour
     {
         Vector2 dir = (player.position - transform.position).normalized;
 
-        // 🚫 evita descer demais
         if (IsTooCloseToGround() && dir.y < 0)
         {
             dir.y = 0.5f;
@@ -178,46 +177,53 @@ public class BeeController : MonoBehaviour
         StartCoroutine(AttackRoutine());
     }
 
-    IEnumerator AttackRoutine()
+IEnumerator AttackRoutine()
+{
+    isAttacking = true;
+    lastAttackTime = Time.time;
+
+    lockedTargetPosition = player.position;
+
+    
+    isWindingUp = true;
+    rb.linearVelocity *= 0.3f;
+
+    yield return new WaitForSeconds(windupTime);
+    isWindingUp = false;
+
+    
+    isDashing = true;
+
+    Vector2 rawDir = (lockedTargetPosition - (Vector2)transform.position).normalized;
+
+    float minY = -0.3f;
+    if (rawDir.y < minY)
     {
-        isAttacking = true;
-        lastAttackTime = Time.time;
-
-        lockedTargetPosition = player.position;
-
-        isWindingUp = true;
-        rb.linearVelocity *= 0.3f;
-
-        yield return new WaitForSeconds(windupTime);
-        isWindingUp = false;
-
-        isDashing = true;
-
-        Vector2 rawDir = (lockedTargetPosition - (Vector2)transform.position).normalized;
-
-        float minY = -0.3f;
-        if (rawDir.y < minY)
-        {
-            rawDir.y = minY;
-            rawDir = rawDir.normalized;
-        }
-
-        FaceDirection(rawDir);
-
-        rb.linearVelocity = rawDir * dashForce;
-
-        yield return new WaitForSeconds(dashDuration);
-        isDashing = false;
-
-        isRecovering = true;
-
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x * 0.5f, recoverUpForce);
-
-        yield return new WaitForSeconds(recoverTime);
-
-        isRecovering = false;
-        isAttacking = false;
+        rawDir.y = minY;
+        rawDir = rawDir.normalized;
     }
+
+    FaceDirection(rawDir);
+
+    
+    mobSound?.PlayWindup();
+
+    rb.linearVelocity = rawDir * dashForce;
+
+    yield return new WaitForSeconds(dashDuration);
+
+    isDashing = false;
+
+    
+    isRecovering = true;
+
+    rb.linearVelocity = new Vector2(rb.linearVelocity.x * 0.5f, recoverUpForce);
+
+    yield return new WaitForSeconds(recoverTime);
+
+    isRecovering = false;
+    isAttacking = false;
+}
 
     public void TakeHit(Vector2 knockback)
     {
@@ -241,7 +247,9 @@ public class BeeController : MonoBehaviour
         if (isDead) return;
 
         isDead = true;
+
         mobSound?.PlayDeath();
+
         currentState = BeeState.Death;
         ScoreManager.Instance.AddScore(scoreValue);
 

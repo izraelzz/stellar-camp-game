@@ -35,7 +35,7 @@ public class HeartEffect : MonoBehaviour
             yield return null;
         }
 
-        // garante que sumiu
+        
         Color final = img.color;
         final.a = 0f;
         img.color = final;
