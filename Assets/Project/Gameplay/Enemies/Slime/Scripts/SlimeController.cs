@@ -82,6 +82,9 @@ public class SlimeController : MonoBehaviour
         rb.freezeRotation = true;
         startPos = transform.position;
         patrolOrigin = transform.position;
+        // alinhar estado inicial de facingRight com o localScale do prefab
+        // no projeto a convenção usada é: scale.x < 0 => "facingRight" verdadeiro
+        facingRight = transform.localScale.x < 0f;
     }
 
     void Update()
