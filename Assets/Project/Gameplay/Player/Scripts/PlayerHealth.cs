@@ -64,6 +64,15 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
+    // Cura o jogador até a vida máxima
+    public void HealToMax()
+    {
+        if (IsDead) return;
+
+        currentHealth = maxHealth;
+        heartUI?.UpdateHearts(currentHealth);
+    }
+
     IEnumerator HitStop()
     {
         float originalTime = Time.timeScale;

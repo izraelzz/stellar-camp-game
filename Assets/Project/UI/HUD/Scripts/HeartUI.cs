@@ -12,7 +12,13 @@ public class HeartUI : MonoBehaviour
             {
                 // garante que coração está ativo
                 if (!hearts[i].activeSelf)
-                    hearts[i].SetActive(true);
+                {
+                    var effect = hearts[i].GetComponent<HeartEffect>();
+                    if (effect != null)
+                        effect.PlayGainEffect();
+                    else
+                        hearts[i].SetActive(true);
+                }
             }
             else
             {

@@ -50,6 +50,9 @@ public class SlimeController : MonoBehaviour
     public float contactKnockbackSide = 5f;
     public float contactKnockbackSideDown = 2f;
     public float contactCooldown = 0.5f;
+    
+    [Header("Knockback")]
+    public float knockbackResist = 0.3f;
 
     public float verticalTolerance = 1.5f;
 
@@ -109,8 +112,22 @@ public class SlimeController : MonoBehaviour
             return;
         }
 
+        // remember previous state to detect state entry transitions
+        SlimeState prevState = currentState;
+
         DecideState();
         HandleState();
+
+        // when we just entered Patrol, reset the patrol origin so patrol range is relative
+        if (currentState == SlimeState.Patrol && prevState != SlimeState.Patrol)
+        {
+            patrolOrigin = transform.position;
+            patrolTimer = 0f;
+            // prevent immediate flip due to position
+            lastFlipTime = Time.time;
+            // sincronizar facingRight com localScale após perseguição (MoveToPlayer altera scale direto)
+            facingRight = transform.localScale.x < 0f;
+        }
     }
 
     void ForceIdle()
@@ -358,7 +375,7 @@ void OnCollisionStay2D(Collision2D collision)
         isHit = true;
 
         rb.linearVelocity = Vector2.zero;
-        rb.AddForce(knockback, ForceMode2D.Impulse);
+        rb.AddForce(knockback * (1f - knockbackResist), ForceMode2D.Impulse);
 
         Invoke(nameof(RecoverFromHit), 0.25f);
     }

@@ -143,12 +143,13 @@ public class PlayerCombat : MonoBehaviour
 
         foreach (var hit in hits)
         {
-            if (hitEnemies.Contains(hit.gameObject)) continue;
-
             IDamageable damageable = hit.GetComponentInParent<IDamageable>();
 
             if (damageable != null)
             {
+                // use the damageable's root gameObject for deduplication
+                GameObject targetObj = (damageable as MonoBehaviour)?.gameObject ?? hit.gameObject;
+                if (hitEnemies.Contains(targetObj)) continue;
                 Vector2 dir;
 
                 float facing = 1f;
@@ -179,7 +180,7 @@ public class PlayerCombat : MonoBehaviour
 
                 damageable.TakeDamage(damage, knockback);
 
-                hitEnemies.Add(hit.gameObject);
+                hitEnemies.Add(targetObj);
                 hitSomething = true;
 
                 HandleBounce(hit.transform);
