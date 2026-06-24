@@ -22,6 +22,14 @@ public class SlimeController : MonoBehaviour
     public float patrolSpeed = 1.2f;
     public float patrolDistance = 2f;
     public float patrolWaitTime = 1.5f;
+    public bool patrolsOnGround = true;
+    public LayerMask groundLayer;
+
+    private Vector2 patrolOrigin;
+    private bool facingRight = true;
+
+    float flipCooldown = 0.2f;
+    float lastFlipTime;
 
     private float patrolTimer;
     private int patrolDir = 1;
@@ -73,6 +81,7 @@ public class SlimeController : MonoBehaviour
 
         rb.freezeRotation = true;
         startPos = transform.position;
+        patrolOrigin = transform.position;
     }
 
     void Update()
@@ -192,34 +201,53 @@ public class SlimeController : MonoBehaviour
 
     void Patrol()
     {
-        float leftLimit = startPos.x - patrolDistance;
-        float rightLimit = startPos.x + patrolDistance;
+        if (!patrolsOnGround) return;
 
-        if (isWaiting)
+        float dir = facingRight ? 1f : -1f;
+        Vector2 pos = transform.position;
+
+        float width = col.bounds.extents.x;
+        float height = col.bounds.extents.y;
+
+        float dynamicDist = Mathf.Max(0.3f, Mathf.Abs(rb.linearVelocity.x) * Time.deltaTime * 10f);
+
+        Vector2 wallTop = pos + new Vector2(dir * (width + 0.05f), height * 0.4f);
+        Vector2 wallBottom = pos + new Vector2(dir * (width + 0.05f), -height * 0.4f);
+
+        bool hitWall =
+            Physics2D.Raycast(wallTop, Vector2.right * dir, dynamicDist, groundLayer) ||
+            Physics2D.Raycast(wallBottom, Vector2.right * dir, dynamicDist, groundLayer);
+
+        Vector2 groundFront = pos + new Vector2(dir * (width + 0.1f), -height);
+        Vector2 groundCenter = pos + new Vector2(0, -height);
+
+        bool hasGroundFront = Physics2D.Raycast(groundFront, Vector2.down, 0.6f, groundLayer);
+        bool hasGroundCenter = Physics2D.Raycast(groundCenter, Vector2.down, 0.6f, groundLayer);
+
+        bool nearEdge = !hasGroundFront && hasGroundCenter;
+
+        float distFromOrigin = Mathf.Abs(pos.x - patrolOrigin.x);
+
+        if ((hitWall || nearEdge || distFromOrigin >= patrolDistance)
+            && Time.time > lastFlipTime + flipCooldown)
         {
-            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
-
-            patrolTimer += Time.deltaTime;
-
-            if (patrolTimer >= patrolWaitTime)
-            {
-                patrolTimer = 0;
-                isWaiting = false;
-                patrolDir *= -1;
-            }
-
+            Flip();
+            lastFlipTime = Time.time;
             return;
         }
 
-        rb.linearVelocity = new Vector2(patrolDir * patrolSpeed, rb.linearVelocity.y);
-        transform.localScale = new Vector3(-patrolDir, 1, 1);
+        rb.linearVelocity = new Vector2(dir * patrolSpeed, rb.linearVelocity.y);
+    }
 
-        if ((patrolDir == 1 && transform.position.x >= rightLimit) ||
-            (patrolDir == -1 && transform.position.x <= leftLimit))
-        {
-            isWaiting = true;
-            patrolTimer = 0;
-        }
+    void Flip()
+    {
+        // inverte o estado de facing
+        facingRight = !facingRight;
+
+        Vector3 s = transform.localScale;
+        // altera mapeamento: quando facingRight for true use -1, quando false use 1 (inverso do original)
+        s.x = Mathf.Abs(s.x) * (facingRight ? -1f : 1f);
+        transform.localScale = s;
     }
 
     IEnumerator StartAgro()
