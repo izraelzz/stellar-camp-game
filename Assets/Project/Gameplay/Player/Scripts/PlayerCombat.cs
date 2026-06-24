@@ -36,12 +36,14 @@ public class PlayerCombat : MonoBehaviour
 
     private Rigidbody2D rb;
     private string currentAttackName;
+    private PlayerMovement playerMovement;
 
     public PlayerSound playerSound;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        playerMovement = GetComponent<PlayerMovement>();
     }
 
     void Update()
@@ -149,9 +151,15 @@ public class PlayerCombat : MonoBehaviour
             {
                 Vector2 dir;
 
+                float facing = 1f;
+                if (playerMovement != null)
+                    facing = playerMovement.IsFacingRight ? 1f : -1f;
+                else
+                    facing = Mathf.Sign(transform.localScale.x);
+
                 if (currentAttackName == "JumpUpAttack" || currentAttackName == "IdleUpAttack")
                 {
-                    float x = Mathf.Sign(transform.localScale.x) * 0.3f;
+                    float x = facing * 0.3f;
                     dir = new Vector2(x, 1f).normalized;
                 }
                 else if (currentAttackName == "JumpDownAttack")
@@ -160,7 +168,7 @@ public class PlayerCombat : MonoBehaviour
                 }
                 else
                 {
-                    dir = Vector2.right * Mathf.Sign(transform.localScale.x);
+                    dir = Vector2.right * facing;
                 }
 
                 float currentKnockback = (currentAttackName == "JumpDownAttack")
