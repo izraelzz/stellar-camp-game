@@ -50,7 +50,7 @@ public class SlimeController : MonoBehaviour
     public float contactKnockbackSide = 5f;
     public float contactKnockbackSideDown = 2f;
     public float contactCooldown = 0.5f;
-    
+
     [Header("Knockback")]
     public float knockbackResist = 0.3f;
 
@@ -65,6 +65,7 @@ public class SlimeController : MonoBehaviour
     private bool isAttacking = false;
     private bool isHit = false;
     public int scoreValue = 10;
+
 
     public enum SlimeState
     {
@@ -278,29 +279,29 @@ public class SlimeController : MonoBehaviour
         isAgroStarting = false;
     }
 
-void MoveToPlayer()
-{
-    float verticalDiff = Mathf.Abs(player.position.y - transform.position.y);
-
-    if (verticalDiff > verticalTolerance)
+    void MoveToPlayer()
     {
-        rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
-        return;
+        float verticalDiff = Mathf.Abs(player.position.y - transform.position.y);
+
+        if (verticalDiff > verticalTolerance)
+        {
+            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+            return;
+        }
+
+        float diff = player.position.x - transform.position.x;
+
+        if (Mathf.Abs(diff) < 0.2f)
+        {
+            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+            return;
+        }
+
+        float dir = Mathf.Sign(diff);
+
+        rb.linearVelocity = new Vector2(dir * moveSpeed, rb.linearVelocity.y);
+        transform.localScale = new Vector3(-dir, 1, 1);
     }
-
-    float diff = player.position.x - transform.position.x;
-
-    if (Mathf.Abs(diff) < 0.2f)
-    {
-        rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
-        return;
-    }
-
-    float dir = Mathf.Sign(diff);
-
-    rb.linearVelocity = new Vector2(dir * moveSpeed, rb.linearVelocity.y);
-    transform.localScale = new Vector3(-dir, 1, 1);
-}
 
     void TryAttack()
     {
@@ -326,47 +327,47 @@ void MoveToPlayer()
         isAttacking = false;
     }
 
-void OnCollisionStay2D(Collision2D collision)
-{
-    if (!collision.gameObject.CompareTag("Player")) return;
-
-    PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
-    if (playerHealth == null || playerHealth.IsDead) return;
-
-    if (Time.time < lastContactTime + contactCooldown)
-        return;
-
-    ContactPoint2D contact = collision.GetContact(0);
-    Vector2 normal = contact.normal;
-
-    Vector2 knockback;
-
-    if (normal.y > 0.5f)
+    void OnCollisionStay2D(Collision2D collision)
     {
-        float side = Mathf.Sign(collision.transform.position.x - transform.position.x);
+        if (!collision.gameObject.CompareTag("Player")) return;
 
-        if (side == 0)
-            side = Random.value < 0.5f ? -1 : 1;
+        PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
+        if (playerHealth == null || playerHealth.IsDead) return;
 
-        knockback = new Vector2(
-            side * contactKnockbackSide,
-            contactKnockbackUp
-        );
+        if (Time.time < lastContactTime + contactCooldown)
+            return;
+
+        ContactPoint2D contact = collision.GetContact(0);
+        Vector2 normal = contact.normal;
+
+        Vector2 knockback;
+
+        if (normal.y > 0.5f)
+        {
+            float side = Mathf.Sign(collision.transform.position.x - transform.position.x);
+
+            if (side == 0)
+                side = Random.value < 0.5f ? -1 : 1;
+
+            knockback = new Vector2(
+                side * contactKnockbackSide,
+                contactKnockbackUp
+            );
+        }
+        else
+        {
+            float dir = Mathf.Sign(collision.transform.position.x - transform.position.x);
+
+            knockback = new Vector2(
+                dir * contactKnockback,
+                contactKnockbackUp
+            );
+        }
+
+        playerHealth.TakeDamage(contactDamage, knockback);
+
+        lastContactTime = Time.time;
     }
-    else
-    {
-        float dir = Mathf.Sign(collision.transform.position.x - transform.position.x);
-
-        knockback = new Vector2(
-            dir * contactKnockback,
-            contactKnockbackUp
-        );
-    }
-
-    playerHealth.TakeDamage(contactDamage, knockback);
-
-    lastContactTime = Time.time;
-}
 
     public void TakeHit(Vector2 knockback)
     {
@@ -390,6 +391,12 @@ void OnCollisionStay2D(Collision2D collision)
         if (isDead) return;
 
         isDead = true;
+
+    Transform hitbox = transform.Find("Hitbox"); // nome do seu filho
+
+    if (hitbox != null)
+        hitbox.gameObject.SetActive(false);
+
         mobSound?.PlayDeath();
         currentState = SlimeState.Death;
         ScoreManager.Instance.AddScore(scoreValue);

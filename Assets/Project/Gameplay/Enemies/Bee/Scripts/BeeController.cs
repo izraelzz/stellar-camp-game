@@ -177,53 +177,53 @@ public class BeeController : MonoBehaviour
         StartCoroutine(AttackRoutine());
     }
 
-IEnumerator AttackRoutine()
-{
-    isAttacking = true;
-    lastAttackTime = Time.time;
-
-    lockedTargetPosition = player.position;
-
-    
-    isWindingUp = true;
-    rb.linearVelocity *= 0.3f;
-
-    yield return new WaitForSeconds(windupTime);
-    isWindingUp = false;
-
-    
-    isDashing = true;
-
-    Vector2 rawDir = (lockedTargetPosition - (Vector2)transform.position).normalized;
-
-    float minY = -0.3f;
-    if (rawDir.y < minY)
+    IEnumerator AttackRoutine()
     {
-        rawDir.y = minY;
-        rawDir = rawDir.normalized;
+        isAttacking = true;
+        lastAttackTime = Time.time;
+
+        lockedTargetPosition = player.position;
+
+
+        isWindingUp = true;
+        rb.linearVelocity *= 0.3f;
+
+        yield return new WaitForSeconds(windupTime);
+        isWindingUp = false;
+
+
+        isDashing = true;
+
+        Vector2 rawDir = (lockedTargetPosition - (Vector2)transform.position).normalized;
+
+        float minY = -0.3f;
+        if (rawDir.y < minY)
+        {
+            rawDir.y = minY;
+            rawDir = rawDir.normalized;
+        }
+
+        FaceDirection(rawDir);
+
+
+        mobSound?.PlayWindup();
+
+        rb.linearVelocity = rawDir * dashForce;
+
+        yield return new WaitForSeconds(dashDuration);
+
+        isDashing = false;
+
+
+        isRecovering = true;
+
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x * 0.5f, recoverUpForce);
+
+        yield return new WaitForSeconds(recoverTime);
+
+        isRecovering = false;
+        isAttacking = false;
     }
-
-    FaceDirection(rawDir);
-
-    
-    mobSound?.PlayWindup();
-
-    rb.linearVelocity = rawDir * dashForce;
-
-    yield return new WaitForSeconds(dashDuration);
-
-    isDashing = false;
-
-    
-    isRecovering = true;
-
-    rb.linearVelocity = new Vector2(rb.linearVelocity.x * 0.5f, recoverUpForce);
-
-    yield return new WaitForSeconds(recoverTime);
-
-    isRecovering = false;
-    isAttacking = false;
-}
 
     public void TakeHit(Vector2 knockback)
     {
@@ -248,6 +248,11 @@ IEnumerator AttackRoutine()
 
         isDead = true;
 
+    Transform hitbox = transform.Find("hitbox"); // nome do seu filho
+
+    if (hitbox != null)
+        hitbox.gameObject.SetActive(false);
+
         mobSound?.PlayDeath();
 
         currentState = BeeState.Death;
@@ -269,7 +274,10 @@ IEnumerator AttackRoutine()
 
         rb.AddTorque(-dir * deathTorque);
 
-        col.enabled = false;
+        foreach (Collider2D collider in GetComponentsInChildren<Collider2D>())
+{
+    collider.enabled = false;
+}
 
         Destroy(gameObject, deathDestroyTime);
     }

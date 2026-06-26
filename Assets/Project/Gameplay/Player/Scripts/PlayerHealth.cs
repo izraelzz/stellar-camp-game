@@ -17,7 +17,6 @@ public class PlayerHealth : MonoBehaviour
     [Header("Knockback")]
     public float knockbackTime = 0.2f;
     private bool isKnocked = false;
-
     public bool IsKnocked => isKnocked;
 
     [Header("HitStop")]
@@ -25,7 +24,7 @@ public class PlayerHealth : MonoBehaviour
 
     [Header("Morte")]
     public float deathDelay = 0.6f;
-    public MonoBehaviour playerControl; // arrasta seu script de movimento aqui
+    public MonoBehaviour playerControl;
 
     private Rigidbody2D rb;
     private HitFlashController flash;
@@ -35,11 +34,21 @@ public class PlayerHealth : MonoBehaviour
 
     void Awake()
     {
-        currentHealth = maxHealth;
-        heartUI?.UpdateHearts(currentHealth);
-
         rb = GetComponent<Rigidbody2D>();
         flash = GetComponentInChildren<HitFlashController>();
+
+        currentHealth = maxHealth;
+
+        isInvincible = false;
+        isKnocked = false;
+        IsDead = false;
+
+        heartUI?.UpdateHearts(currentHealth);
+    }
+
+    void Start()
+    {
+        ApplyCheckpoint();
     }
 
     public void TakeDamage(int damage, Vector2 knockback)
@@ -64,7 +73,6 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
-    // Cura o jogador até a vida máxima
     public void HealToMax()
     {
         if (IsDead) return;
@@ -107,18 +115,18 @@ public class PlayerHealth : MonoBehaviour
 
         IsDead = true;
 
-        // trava controle do player
+        Debug.Log("Player morreu");
+
         if (playerControl != null)
             playerControl.enabled = false;
 
         rb.linearVelocity = Vector2.zero;
-        rb.bodyType = RigidbodyType2D.Dynamic;
-        rb.gravityScale = 3f;
+        rb.angularVelocity = 0f;
 
-        
-        rb.AddForce(new Vector2(0, 5f), ForceMode2D.Impulse);
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.gravityScale = 0f;
 
-        Debug.Log("Player morreu");
+        rb.AddForce(Vector2.up * 5f, ForceMode2D.Impulse);
 
         StartCoroutine(DeathRoutine());
     }
@@ -127,6 +135,18 @@ public class PlayerHealth : MonoBehaviour
     {
         yield return new WaitForSeconds(deathDelay);
 
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
 
+    void ApplyCheckpoint()
+    {
+        if (CheckpointManager.Instance == null) return;
+        if (!CheckpointManager.Instance.hasCheckpoint) return;
+
+        transform.position = CheckpointManager.Instance.lastCheckpointPosition + Vector3.up * 0.5f;
+        if (CheckpointManager.Instance.lastCamera != null)
+{
+    CameraManager.SwitchCamera(CheckpointManager.Instance.lastCamera);
+}
     }
 }
