@@ -355087,7 +355087,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1008826402}
-  - {fileID: 1216365810}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &977207503
@@ -380427,12 +380426,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1216365809}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -9.40848, y: 21.495255, z: -0.24069333}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 976980588}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1216365811
 MonoBehaviour:
@@ -380448,6 +380447,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lastCheckpointPosition: {x: 0, y: 0, z: 0}
   hasCheckpoint: 0
+  lastCamera: {fileID: 0}
 --- !u!1 &1216840759
 GameObject:
   m_ObjectHideFlags: 0
@@ -551506,6 +551506,7 @@ SpriteRenderer:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 1216365810}
   - {fileID: 976980588}
   - {fileID: 364049483}
   - {fileID: 646027383}
