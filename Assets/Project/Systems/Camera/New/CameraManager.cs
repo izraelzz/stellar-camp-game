@@ -13,19 +13,18 @@ public class CameraManager : MonoBehaviour
         return camera == ActiveCamera;
     }
 
-    public static void SwitchCamera(CinemachineCamera newCamera)
-    {
-        newCamera.Priority = 10;
-        ActiveCamera = newCamera;
+public static void SwitchCamera(CinemachineCamera newCamera)
+{
+    if (newCamera == null)
+        return;
 
-        foreach (CinemachineCamera cam in cameras)
-        {
-            if (cam != newCamera)
-            {
-                cam.Priority = 0;
-            }
-        }
+    ActiveCamera = newCamera;
+
+    foreach (CinemachineCamera cam in cameras)
+    {
+        cam.Priority = (cam == newCamera) ? 20 : 10;
     }
+}
 
     public static void Register(CinemachineCamera camera)
     {

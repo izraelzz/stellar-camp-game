@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using Unity.Cinemachine;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -48,6 +49,13 @@ public class PlayerHealth : MonoBehaviour
 
     void Start()
     {
+        StartCoroutine(ApplyCheckpointRoutine());
+    }
+
+    IEnumerator ApplyCheckpointRoutine()
+    {
+        yield return null; // espera 1 frame
+
         ApplyCheckpoint();
     }
 
@@ -131,6 +139,25 @@ public class PlayerHealth : MonoBehaviour
         StartCoroutine(DeathRoutine());
     }
 
+    IEnumerator RestoreCamera(CinemachineCamera cam)
+    {
+        var brain = Camera.main.GetComponent<CinemachineBrain>();
+
+        var oldBlend = brain.DefaultBlend;
+
+        // Faz um corte instantâneo
+        brain.DefaultBlend = new CinemachineBlendDefinition(
+            CinemachineBlendDefinition.Styles.Cut, 0f);
+
+        CameraManager.SwitchCamera(cam);
+
+        // Espera um frame
+        yield return null;
+
+        // Volta para o blend normal
+        brain.DefaultBlend = oldBlend;
+    }
+
     IEnumerator DeathRoutine()
     {
         yield return new WaitForSeconds(deathDelay);
@@ -144,9 +171,22 @@ public class PlayerHealth : MonoBehaviour
         if (!CheckpointManager.Instance.hasCheckpoint) return;
 
         transform.position = CheckpointManager.Instance.lastCheckpointPosition + Vector3.up * 0.5f;
-        if (CheckpointManager.Instance.lastCamera != null)
-{
-    CameraManager.SwitchCamera(CheckpointManager.Instance.lastCamera);
-}
+
+        Debug.Log("Câmera a restaurar: " + CheckpointManager.Instance.lastCameraName);
+
+        CinemachineCamera[] cameras =
+            FindObjectsByType<CinemachineCamera>(FindObjectsSortMode.None);
+
+        foreach (var cam in cameras)
+        {
+            Debug.Log("Encontrada: " + cam.name);
+
+            if (cam.name == CheckpointManager.Instance.lastCameraName)
+            {
+                Debug.Log("Trocando para: " + cam.name);
+                StartCoroutine(RestoreCamera(cam));
+                break;
+            }
+        }
     }
 }

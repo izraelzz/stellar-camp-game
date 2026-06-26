@@ -6,7 +6,7 @@ public class CheckpointManager : MonoBehaviour
 
     public Vector3 lastCheckpointPosition;
     public bool hasCheckpoint;
-    public CinemachineCamera lastCamera;
+    public string lastCameraName;
 
     void Awake()
     {
@@ -25,6 +25,14 @@ public void SetCheckpoint(Vector3 pos)
     lastCheckpointPosition = pos;
     hasCheckpoint = true;
 
-    lastCamera = CameraManager.ActiveCamera;
+    if (CameraManager.ActiveCamera != null)
+    {
+        lastCameraName = CameraManager.ActiveCamera.name;
+        Debug.Log("Checkpoint salvo. Câmera: " + lastCameraName);
+    }
+    else
+    {
+        Debug.LogWarning("ActiveCamera é NULL!");
+    }
 }
 }
