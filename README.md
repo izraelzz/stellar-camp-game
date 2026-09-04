@@ -15,7 +15,7 @@ Explore mapas interligados, enfrente inimigos com IA de patrulha, desbloqueie no
 4. Abra o projeto com a versão do Unity compatível (verifique em `ProjectSettings`).
 5. Abra a cena principal em `Project/Scenes/SampleScene` e clique em **Play**.
 
-## 📸 Imagens do Jogo
+## 📸 Screenshots
 
 | | | |
 |---|---|---|
