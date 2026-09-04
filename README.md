@@ -14,3 +14,10 @@ Explore mapas interligados, enfrente inimigos com IA de patrulha, desbloqueie no
 3. Clique em **Add** e selecione a pasta do projeto clonado.
 4. Abra o projeto com a versão do Unity compatível (verifique em `ProjectSettings`).
 5. Abra a cena principal em `Project/Scenes/SampleScene` e clique em **Play**.
+
+## 📸 Imagens do Jogo
+
+| | | |
+|---|---|---|
+| ![](docs/images/screenshot1.png) | ![](docs/images/screenshot2.png) | ![](docs/images/screenshot3.png) |
+| ![](docs/images/screenshot4.png) | ![](docs/images/screenshot5.png) | ![](docs/images/screenshot6.png) |
